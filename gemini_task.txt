@@ -1,0 +1,8 @@
+>	Void UnityGameFramework.Editor.ResourceTools.ResourceAnalyzerController:AnalyzeAsset (String, Asset, DependencyData, HashSet`1)+0x2a at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\Scripts\Editor\ResourceAnalyzer\ResourceAnalyzerController.cs:[141:21-141:153]	C#
+ 	Void UnityGameFramework.Editor.ResourceTools.ResourceAnalyzerController:AnalyzeAsset (String, Asset, DependencyData, HashSet`1)+0x14b at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\Scripts\Editor\ResourceAnalyzer\ResourceAnalyzerController.cs:[194:21-194:100]	C#
+ 	Void UnityGameFramework.Editor.ResourceTools.ResourceAnalyzerController:Analyze ()+0xb6 at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\Scripts\Editor\ResourceAnalyzer\ResourceAnalyzerController.cs:[115:17-115:86]	C#
+ 	Boolean UnityGameFramework.Editor.ResourceTools.ResourceBuilderController:BuildResources ()+0x45c at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\Scripts\Editor\ResourceBuilder\ResourceBuilderController.cs:[656:17-656:56]	C#
+ 	Void UGF.EditorTools.AppBuildEidtor:BuildResources ()+0x7 at D:\UnityProjects\GF_X\GF_X\Assets\AAAGame\ScriptsBuiltin\Editor\EditorTools\AppBuildEidtor.cs:[1049:13-1049:47]	C#
+ 	Void UGF.EditorTools.AppBuildEidtor:Update ()+0x14 at D:\UnityProjects\GF_X\GF_X\Assets\AAAGame\ScriptsBuiltin\Editor\EditorTools\AppBuildEidtor.cs:[154:17-154:34]	C#
+ 	Void UnityEditor.HostView:SendUpdate ()+0xd at :-1	C#
+ 	Void UnityEditor.EditorApplication:Internal_CallUpdateFunctions ()+0x33 at :-1	C#

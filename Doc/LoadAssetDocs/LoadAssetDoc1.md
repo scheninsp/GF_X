@@ -1,0 +1,530 @@
+
+# 打包
+
+**ResourceManager.ResourceLoader.cs / GetBinaryPath**
+```
+/// <summary>
+/// 获取二进制资源的实际路径。
+/// </summary>
+/// <param name="binaryAssetName">要获取实际路径的二进制资源的名称。</param>
+/// <returns>二进制资源的实际路径。</returns>
+/// <remarks>此方法仅适用于二进制资源存储在磁盘（而非文件系统）中的情况。若二进制资源存储在文件系统中时，返回值将始终为空。</remarks>
+public string GetBinaryPath(string binaryAssetName)
+{
+    ResourceInfo resourceInfo = GetResourceInfo(binaryAssetName);
+    if (resourceInfo == null)
+    {
+        return null;
+    }
+
+    if (!resourceInfo.Ready)
+    {
+        return null;
+    }
+
+    if (!resourceInfo.IsLoadFromBinary)
+    {
+        return null;
+    }
+
+    if (resourceInfo.UseFileSystem)
+    {
+        return null;
+    }
+
+    return Utility.Path.GetRegularPath(Path.Combine(resourceInfo.StorageInReadOnly ? m_ResourceManager.m_ReadOnlyPath : m_ResourceManager.m_ReadWritePath, resourceInfo.ResourceName.FullName));
+}
+```
+
+ResourceInfo 是 ResourceManager 内部的一个 private sealed class，定义在Assets\Plugins\UnityGameFramework\GameFramework\Resource\ResourceManager.ResourceInfo.cs。
+
+
+IsLoadFromBinary 是 ResourceInfo 的只读属性，其值由资源的 LoadType 决定。如果 LoadType
+为 LoadFromBinary、LoadFromBinaryAndQuickDecrypt 或 LoadFromBinaryAndDecrypt，则
+IsLoadFromBinary 为 true。每个资源的 LoadType 在资源版本列表文件（如
+GameFrameworkVersion.dat）中定义，这些文件由资源构建工具在创建 AssetBundle
+时生成，该工具会检查每个资产并确定其 LoadType。非标准 Unity
+资产通常被标记为二进制文件。
+
+**ResourceManager.ResourceInfo.cs \ ResourceInfo**
+```
+/// <summary>
+/// 初始化资源信息的新实例。
+/// </summary>
+/// <param name="resourceName">资源名称。</param>
+/// <param name="fileSystemName">文件系统名称。</param>
+/// <param name="loadType">资源加载方式。</param>
+/// <param name="length">资源大小。</param>
+/// <param name="hashCode">资源哈希值。</param>
+/// <param name="compressedLength">压缩后资源大小。</param>
+/// <param name="storageInReadOnly">资源是否在只读区。</param>
+/// <param name="ready">资源是否准备完毕。</param>
+public ResourceInfo(ResourceName resourceName, string fileSystemName, LoadType loadType, int length, int hashCode, int compressedLength, bool storageInReadOnly, bool ready)
+{
+    m_ResourceName = resourceName;
+    m_FileSystemName = fileSystemName;
+    m_LoadType = loadType;
+    m_Length = length;
+    m_HashCode = hashCode;
+    m_CompressedLength = compressedLength;
+    m_StorageInReadOnly = storageInReadOnly;
+    m_Ready = ready;
+}
+```
+
+FileSystemName 是 Game Framework 中自定义文件系统的标识，通常对应一个 .dat 文件，如 resources.dat 或shared.dat。例如，核心UI资源打包到 UI.dat 文件时，其 ResourceInfo.FileSystemName 为"UI"；游戏关卡资源打包到 Levels.dat 时，FileSystemName 为 "Levels"。ResourceManager通过 FileSystemName定位并加载资源。
+
+生成 dat 文件的核心代码链路如下:
+1. `Assets/Plugins/UnityGameFramework/Scripts/Editor/ResourceBuilder/ResourceBuilderController.cs` -> `BuildResources()`: 启动整个资源构建流程。
+2. `...` -> `BuildResources(Platform ...)`: 针对特定平台执行构建。
+3. `...` -> `CreateFileSystems(...)`: 在此方法中，根据配置创建空的 .dat 文件。路径格式为：Path.Combine(outputPath, "{fileSystemName}.dat")。
+4. `...` -> `ProcessOutput(...)`: 将单个资源的数据通过 IFileSystem.WriteFile()接口写入对应的 .dat 文件流中。实际的文件I/O操作由 GameFramework.FileSystem 模块封装。
+
+  然而，在资源打包流程中，还会生成另外几种至关重要的 .dat文件，它们是资源清单文件，用于描述所有资源的信息。这些文件更有可能是您想了解的。根据代码，主要有以下三种清单文件：
+   1. 可更新资源清单 (`UpdatableVersionList`): 由 ProcessUpdatableVersionList方法生成，最终保存为GameFrameworkVersion.{crc32}.dat。这是用于热更新模式的核心文件，包含了资源服务器上所有可更新的资源信息。
+   2. 包内资源清单 (`PackageVersionList`): 由 ProcessPackageVersionList 方法生成，保存为GameFrameworkVersion.dat。它包含了资源包的完整信息，通常用于版本校验。
+   3. 只读区资源清单 (`LocalVersionList`): 由 ProcessReadOnlyVersionList 方法生成，保存为GameFrameworkList.dat。它描述了打包在程序本体内、只读的资源。
+
+
+Assets\Plugins\UnityGameFramework\Scripts\Runtime\Resource\BuiltinVersionListSerializer.UpdatableVersionListSerializeCallback.cs
+UpdatableVersionListSerializeCallback_V2
+
+  `UpdatableVersionList` (V2) 文件格式
+
+  1. 加密密钥
+   - 随机加密Key (byte[], 4字节)
+     - 文件开头的4个字节是一个随机生成的密钥。后续所有标记为 "加密字符串"的字段都使用此密钥进行简单的异或加密。
+
+  2. 文件头信息
+   - 适用游戏版本号 (加密字符串)
+     - 例如 "1.0.0"，用于标识此资源列表对应的游戏版本。
+   - 内部资源版本号 (7-bit Encoded Int32)
+     - 整型的资源版本号，用于增量更新判断。7-bit Encoded
+       是一种可变长度的整数编码，用于节省空间。
+
+  3. 资产列表 (Assets)
+   - 资产总数 (7-bit Encoded Int32)
+   - [循环 `资产总数` 次] 每个资产的信息：
+       - 资产名称 (加密字符串)
+         - 资产的完整路径名，例如 "Assets/Prefabs/MyUI.prefab"。
+       - 依赖资产数量 (7-bit Encoded Int32)
+       - [循环 `依赖资产数量` 次]
+           - 依赖资产索引 (7-bit Encoded Int32)
+             - 该依赖资产在 "资产列表" 中的索引。
+
+  4. 资源列表 (Resources)
+   - 资源总数 (7-bit Encoded Int32)
+   - [循环 `资源总数` 次] 每个资源（AssetBundle）的信息：
+       - 资源名称 (加密字符串)
+         - 资源名，例如 "myui_prefab"。
+       - 变体名称 (加密字符串)
+         - 资源的变体名(variant)，例如 "sd" 或 "hd"。如果不存在则为空字符串。
+       - 文件扩展名 (加密字符串)
+         - 资源的文件扩展名。
+       - 加载方式 (byte)
+         - LoadType 枚举值，表示资源的加载方式（例如从内存加载、从文件加载等）。
+       - 原始文件长度 (7-bit Encoded Int32)
+       - 原始文件哈希码 (Int32, 4字节)
+         - 未压缩、未加密的原始资源文件的 CRC32 哈希值。
+       - 压缩后文件长度 (7-bit Encoded Int32)
+       - 压缩后文件哈希码 (Int32, 4字节)
+         - 压缩后文件的 CRC32 哈希值。
+       - 包含资产数量 (7-bit Encoded Int32)
+         - 这个资源包内包含的资产数量。
+       - [循环 `包含资产数量` 次]
+           - 资产索引 (7-bit Encoded Int32)
+             - 包含的资产在 "资产列表" 中的索引。
+
+  5. 文件系统列表 (File Systems)
+   - 文件系统总数 (7-bit Encoded Int32)
+   - [循环 `文件系统总数` 次] 每个文件系统的信息：
+       - 文件系统名称 (加密字符串)
+         - 所属文件系统的名称。
+       - 包含资源数量 (7-bit Encoded Int32)
+       - [循环 `包含资源数量` 次]
+           - 资源索引 (7-bit Encoded Int32)
+             - 属于此文件系统的资源在 "资源列表" 中的索引。
+
+  6. 资源组列表 (Resource Groups)
+   - 资源组总数 (7-bit Encoded Int32)
+   - [循环 `资源组总数` 次] 每个资源组的信息：
+       - 资源组名称 (加密字符串)
+         - 资源组的名称，例如 "UI"、"SceneA" 等。
+       - 包含资源数量 (7-bit Encoded Int32)
+       - [循环 `包含资源数量` 次]
+           - 资源索引 (7-bit Encoded Int32)
+             - 属于此资源组的资源在 "资源列表" 中的索引。
+
+
+生成 .dat 文件的逻辑是一个通用的资源处理流程，它会遍历所有待处理的 AB 包，并逐个生成对应的 .dat 文件。
+关键的函数是 private bool BuildResources(Platform platform, ...)。在这个函数内部，有一个循环会遍历所有被识别为 AssetBundle 的资源。
+```
+private bool BuildResources(Platform platform, AssetBundleBuild[] assetBundleBuildDatas, BuildAssetBundleOptions buildAssetBundleOptions, ResourceData[] assetBundleResourceDatas, ResourceData[] binaryResourceDatas)
+{
+        for (int i = 0; i < assetBundleResourceDatas.Length; i++)
+        {
+            ProcessAssetBundle
+        }
+}
+```
+
+```
+private bool ProcessAssetBundle(Platform platform, string workingPath, string outputPackagePath, string outputFullPath, string outputPackedPath, bool additionalCompressionSelected, string name, string variant, string fileSystem)
+{
+   return ProcessOutput(platform, outputPackagePath, outputFullPath, outputPackedPath, additionalCompressionSelected, name, variant, fileSystem, resourceData, bytes, length, hashCode, compressedLength, compressedHashCode);
+}
+
+
+```
+ProcessAssetBundle 直接将 ab 包使用
+byte[] bytes = File.ReadAllBytes(workingName); 读入
+然后在 processOutput 中，再用 File.WriteAllBytes 输出到自己的文件系统
+
+
+```
+ResourceBuilderController:ProcessAssetBundle 992
+ResourceBuilderController:BuildResources 914
+ResourceBuilderController:BuildResources 689
+AppBuildEidtor:BuildResources 1049
+AppBuildEidtor:Update 154
+HostView:SendUpdate -1
+EditorApplication:Internal_CallUpdateFunctions -1
+```
+
+ProcessAssetBundle 参数
+platform Windows64
+workingPath "D:/UnityProjects/GF_X/GF_X/AB/Working/Windows64/"
+outputFullPath "D:/UnityProjects/GF_X/GF_X/AB/Full/1_0_0_1/Windows64/"
+outputPackedPath "D:/UnityProjects/GF_X/GF_X/AB/Packed/1_0_0_1/Windows64/"
+additionalCompressionSelected true
+name "Config"
+variant null
+fileSystem null
+
+name "Core","DataTable","Entity","HotfixDlls",
+"Language","Scene","ScriptableAssets","SharedAssets","UI"
+
+
+ProcessAssetBundle 中的 m_ResourceDatas 来源于 m_ResouceCollection
+```
+private bool PrepareBuildData(out AssetBundleBuild[] assetBundleBuildDatas, out ResourceData[] assetBundleResourceDatas, out ResourceData[] binaryResourceDatas) {
+    Resource[] resources = m_ResourceCollection.GetResources();
+    foreach (Resource resource in resources)
+    {
+        m_ResourceDatas.Add(resource.FullName, new ResourceData(resource.Name, resource.Variant, resource.FileSystem, resource.LoadType, resource.Packed, resource.GetResourceGroups()));
+    }
+}
+
+```
+
+m_ResouceCollection 来源 ResourceCollection.xml
+Assets\Plugins\UnityGameFramework\Configs\ResourceCollection.xml
+ResourceCollection.xml  来自 Resource Editor ，菜单栏工具
+
+## ResouceCollection.xml 中指定的大区分
+Config
+游戏业务配置，类似常量表
+Assets\AAAGame\Config\GameConfig.txt
+GameConfig.bytes
+
+Core
+GFExtension.prefab
+  总结来说，GFExtension.prefab是一个在游戏启动时就应该被实例化的核心对象。它集成了数管理（DataModel）、全局变量（VariablePool）和常驻的核心UI（如加载界面和摇杆）等功能，为游戏提供了一个便利、统一的管理框架。
+
+DataTable
+Assets/AAAGame/DataTable 中的内容
+
+Entity
+实体 prefab
+例如 Bullet.prefab, FireFx.prefab, MyPlayer.prefab ...
+
+HotfixDlls
+HybridCLR 热更信息
+包含 Assets\AAAGame\HotfixDlls\Hotfix.bytes 和 HotfixFileList.txt
+
+Language
+语言。
+
+Scene
+所有场景。Game.unity, Launch.unity
+
+ScriptableAssets
+Assets\AAAGame\ScriptableAssets\Core\AppConfigs.asset
+游戏流程控制，数据表包含信息，Config, Launguage
+类似于一个总索引
+
+SharedAssets
+字体，贴图，Shader
+
+UI
+UI prefabs
+
+上面的都会被分配到不同的 dat 文件
+
+
+
+MyPlayer.prefab 被明确分配到了 Entity 资源组。
+PlayerCtrl.controller 和 Humanoid@IdleHold2Guns.FBX 作为 MyPlayer.prefab的依赖项，并且它们本身没有在 ResourceCollection.xml 中被分配到任何其他的资源组。
+因此，为了保证 MyPlayer.prefab 在加载后能找到它的所有依赖，打包工具会将 PlayerCtrl.controller 和 Humanoid@IdleHold2Guns.FBX 都打包到 MyPlayer.prefab 所在的 AB 包中，也就是 Entity 组对应的那个包。
+
+
+GF_X\AB\Full\1_0_0_1\Windows64\version.json 的内容如下：
+```
+    1 {
+    2     "InternalResourceVersion": 1,
+    3     "VersionListLength": 3661,
+    4     "VersionListHashCode": -150839323,
+    5     "VersionListCompressedLength": 1477,
+    6     "VersionListCompressedHashCode": -1320346421,
+    7     "ApplicableGameVersion": "1.0.0|1.0.1|1.0.2",
+    8     "UpdatePrefixUri": "http://127.0.0.1:8080/1_0_0_1/Windows64",
+    9     "LastAppVersion": "1.0.0",
+   10     "ForceUpdateApp": false,
+   11     "AppUpdateUrl": "https://play.google.com/store/apps/details?id=",
+   12     "AppUpdateDesc": "1. bug fix.\n2. add xxx"
+   13 }
+```
+
+# 打 UnityAB 包
+
+资产依赖分析
+```
+ResourceAnalyzerController:AnalyzeAsset 141
+ResourceAnalyzerController:AnalyzeAsset 194
+ResourceAnalyzerController:Analyze 115
+ResourceBuilderController:BuildResources 656
+AppBuildEidtor:BuildResources 1049
+AppBuildEidtor:Update 154
+HostView:SendUpdate -1
+EditorApplication:Internal_CallUpdateFunctions -1
+```
+
+资产依赖分析主入口
+ResourceAnalyzerController.cs
+```
+public void Analyze(){
+
+    Asset[] assets = m_ResourceCollection.GetAssets();
+
+}
+
+```
+
+
+获取资产依赖 AssetDatabase.GetDependencies
+```
+//hostAsset : ResourceCollection.xml 中指定的大区分
+//dependencyData : Editor\ResourceAnalyzer\DependencyData.cs
+//
+
+private void AnalyzeAsset(string assetName, Asset hostAsset, DependencyData dependencyData, HashSet<string> scriptAssetNames)
+{
+        string[] dependencyAssetNames = AssetDatabase.GetDependencies(assetName, false);
+}
+```
+
+## DependencyData
+
+### Resource
+
+一个 resource 对应 ResourceCollection.xml 中定义的一个大分区中的一个“资源”
+可能是单一的一个 Asset，也可能是一组 Asset
+
+Resouce: ResourceCollection\Resource.cs
+```
+m_Assets = new List<Asset>();
+m_ResourceGroups = new List<string>();
+
+Name = name;
+Variant = variant;
+AssetType = AssetType.Unknown;
+FileSystem = fileSystem;
+LoadType = loadType;
+Packed = packed;
+```
+对应一个 ab 包？ name, variant 是 ab 包名 Name.Variant?
+FileSystem，LoadType，Packed 是加载 ab 包时的策略
+
+
+一个 Asset 对应一个具有 guid 的 Unity 资产
+一个 Asset 只能存在于一个 Resource 内
+### Asset
+```
+private Asset(string guid, Resource resource)
+{
+    Guid = guid;
+    Resource = resource;
+}
+```
+判断一个 ResourceCollection 中是否存在某个资产：
+Asset asset = m_ResourceCollection.GetAsset(guid);
+
+
+
+### DependencyData 生成和用途
+  DependencyData 类用于在资源分析过程中，存储一个“宿主资源”（Host
+  Asset）所依赖的所有其他资产和资源（AssetBundle）的信息。它包含三个核心的私有成员变量：
+
+   * private List<Resource> m_DependencyResources;
+       * 作用：存储所有被依赖的 资源（`Resource`） 列表。在 GameFramework 的资源系统中，一个 Resource通常代表一个 AssetBundle 文件。此列表是去重后的，即一个 AssetBundle无论被多少个资产依赖，在这里只会出现一次。
+       * 目的：用于最终统计宿主资源依赖了多少个不同的 AssetBundle。
+
+   * private List<Asset> m_DependencyAssets;
+       * 作用：存储所有被依赖的 资产（`Asset`） 列表。一个 Asset 是 AssetBundle 中的具体内容，例如一个Prefab、一张 Texture、一个 AudioClip 等。
+       * 目的：提供一份详细的、被宿主资源直接或间接依赖的、且已正确配置在某个 Resource (AssetBundle)中的所有资产清单。
+
+   * private List<string> m_ScatteredDependencyAssetNames;
+       * 作用：存储所有被依赖的 “散乱”资产的名称（路径）。
+       * 目的：这是非常关键的一个列表，它用于识别那些被依赖了，但是没有被配置到任何 `Resource` (AssetBundle)中的资产。这些通常是资源配置中的遗漏项或错误。例如，一个 Prefab依赖了一张贴图，但这张贴图没有被标记到任何 AssetBundle中，那么这张贴图的路径就会被记录到这个列表里。
+
+总结：
+在整个 AnalyzeAsset 的递归分析过程中，dependencyData 对象就像一个不断被填充的篮子：
+   * 当遇到一个配置正确的依赖资产时，就把这个资产本身丢进 m_DependencyAssets 篮子，并把它所属的 AssetBundle 丢进 m_DependencyResources 篮子（如果篮子里还没有的话）。
+   * 当遇到一个未配置的依赖资产（即“散乱”资产）时，就把这个资产的名字（路径）写在一张纸条上，丢进
+     m_ScatteredDependencyAssetNames 篮子。
+
+例：
+MyPlayer.prefab 在 AnalyzeAsset 过程中，分析到 fbx 时的情况
+m_DependencyAssets 为空
+m_DependencyResources 为空
+m_ScatteredDependencyAssetNames	Count = 4
+"Assets/AAAGame/Materials/Player.mat"
+"Packages/com.unity.render-pipelines.universal/Shaders/SimpleLit.shader"
+"Assets/AAAGame/Animation/PlayerCtrl.controller"
+"Assets/AAAGame/Animation/Humanoid@death.fbx"
+
+
+# BuildResources 生成 ab 包
+
+```
+private bool BuildResources(Platform platform, AssetBundleBuild[] assetBundleBuildDatas, BuildAssetBundleOptions buildAssetBundleOptions, ResourceData[] assetBundleResourceDatas, ResourceData[] binaryResourceDatas)
+```
+注意 assetBundleBuildDatas 这个数组输入时为空，函数内处理，输出就是要打的 ab 包的列表
+
+准备 `AssetBundleBuild` 列表
+      AssetBundleBuild 是 Unity 的一个结构体，它只有两个关键成员：
+       * string assetBundleName：要生成的 AssetBundle 的名字。
+       * string[] assetNames：一个字符串数组，包含了所有要打进这个 AssetBundle 的资产路径。
+
+
+在 BuildResources 方法中，您会看到类似下面这样的逻辑（为了便于理解，我将代码逻辑简化并展示）：
+这里 assetBundleBuilds 就是简化后的 assetBundleBuildDatas
+```
+    1     // 这是一个简化版的逻辑，实际代码会更复杂
+    2     List<AssetBundleBuild> assetBundleBuilds = new List<AssetBundleBuild>();
+    3
+    4     // 遍历所有从 ResourceCollection 中获取的、被标记为需要打包(Packed)的 Resource
+    5     foreach (Resource resource in allPackedResources)
+    6     {
+    7         AssetBundleBuild assetBundleBuild = new AssetBundleBuild();
+    8
+    9         // 1. 设置 AssetBundle 的名字，来自于 Resource.FullName
+   10         assetBundleBuild.assetBundleName = resource.FullName;
+   11
+   12         // 2. 获取这个 Resource 包含的所有 Asset
+   13         Asset[] assets = resource.GetAssets();
+   14         string[] assetNames = new string[assets.Length];
+   15         for (int i = 0; i < assets.Length; i++)
+   16         {
+   17             // 3. 从 Asset 对象中获取资产的真实路径
+   18             assetNames[i] = assets[i].Name;
+   19         }
+   20
+   21         // 4. 设置这个 AssetBundle 要包含的所有资产路径
+   22         assetBundleBuild.assetNames = assetNames;
+   23
+   24         assetBundleBuilds.Add(assetBundleBuild);
+   25     }
+```
+
+3. 调用 Unity 底层接口
+    当 assetBundleBuilds 列表准备好之后，就万事俱备了。最后，代码会调用 Unity 的核心打包 API
+BuildPipeline.BuildAssetBundles，并将这个列表作为参数传递进去。这就是您在搜索结果中看到的那一行：
+
+1     // L855:
+2     AssetBundleManifest assetBundleManifest = BuildPipeline.BuildAssetBundles(workingPath,
+    assetBundleBuildDatas, buildAssetBundleOptions, GetBuildTarget(platform));
+
+    * workingPath: AssetBundle 的输出目录。
+    * assetBundleBuildDatas: 就是我们上一步精心准备的 AssetBundleBuild 列表。
+    * buildAssetBundleOptions: 打包选项（例如压缩方式、是否禁用类型树等）。
+    * GetBuildTarget(platform): 目标平台（如 BuildTarget.StandaloneWindows64）。
+
+
+
+
+# 加载
+
+
+**ResourceManager.ResourceLoader.cs / LoadBinaryFromFileSystem**
+```
+/// <summary>
+/// 从文件系统中加载二进制资源。
+/// </summary>
+/// <param name="binaryAssetName">要加载二进制资源的名称。</param>
+/// <returns>存储加载二进制资源的二进制流。</returns>
+public byte[] LoadBinaryFromFileSystem(string binaryAssetName)
+{
+    ResourceInfo resourceInfo = GetResourceInfo(binaryAssetName);
+    if (resourceInfo == null)
+    {
+        throw new GameFrameworkException(Utility.Text.Format("Can not load binary '{0}' from file system which is not exist.", binaryAssetName));
+    }
+
+    if (!resourceInfo.Ready)
+    {
+        throw new GameFrameworkException(Utility.Text.Format("Can not load binary '{0}' from file system which is not ready.", binaryAssetName));
+    }
+
+    if (!resourceInfo.IsLoadFromBinary)
+    {
+        throw new GameFrameworkException(Utility.Text.Format("Can not load binary '{0}' from file system which is not a binary asset.", binaryAssetName));
+    }
+
+    if (!resourceInfo.UseFileSystem)
+    {
+        throw new GameFrameworkException(Utility.Text.Format("Can not load binary '{0}' from file system which is not use file system.", binaryAssetName));
+    }
+
+    IFileSystem fileSystem = m_ResourceManager.GetFileSystem(resourceInfo.FileSystemName, resourceInfo.StorageInReadOnly);
+    byte[] bytes = fileSystem.ReadFile(resourceInfo.ResourceName.FullName);
+    if (bytes == null)
+    {
+        return null;
+    }
+
+    if (resourceInfo.LoadType == LoadType.LoadFromBinaryAndQuickDecrypt || resourceInfo.LoadType == LoadType.LoadFromBinaryAndDecrypt)
+    {
+        DecryptResourceCallback decryptResourceCallback = m_ResourceManager.m_DecryptResourceCallback ?? DefaultDecryptResourceCallback;
+        decryptResourceCallback(bytes, 0, bytes.Length, resourceInfo.ResourceName.Name, resourceInfo.ResourceName.Variant, resourceInfo.ResourceName.Extension, resourceInfo.StorageInReadOnly, resourceInfo.FileSystemName, (byte)resourceInfo.LoadType, resourceInfo.Length, resourceInfo.HashCode);
+    }
+
+    return bytes;
+}
+
+```
+
+
+
+# 加载 FBX
+
+  综合以上分析，你的 .fbx 文件被“删除”的根本原因是：
+
+   1. 你在 App Builder 窗口中勾选了 "Enable [Rule Editor]" 选项，启用了规则模式。
+   2. 这导致了构建开始时 RefreshResourceRule 逻辑被执行，它清空了你之前手动的配置。
+   3. 在你的 Resource Rule Editor 的所有规则中，没有任何一条规则的 AssetDirectory 和 Search Patterns
+      能够匹配并包含到你的 @Assets/AAAGame/Animation/test_strech_squash_2020_6.fbx 这个文件。
+   4. 因此，在重新生成资源列表时，这个 .fbx 文件没有被任何规则捕获并添加回来。
+   5. 最终，ResourceCollection.xml
+      中没有这个资源的任何信息，导致它在构建过程中被彻底忽略，看起来就像是被“删除”了。
+      
+
+重新打开 Resource Rule Editor，把 fbx 放到一个单独文件夹，然后加入此文件夹，设置 Load From File
+```
+private void AnalyzeAsset(string assetName, Asset hostAsset, DependencyData dependencyData, HashSet<string> scriptAssetNames)
+```
+
+没有人依赖这个 fbx
+这个 fbx 唯一的 dependencyAsset 是 shader
+"Packages/com.unity.render-pipelines.universal/Shaders/Lit.shader"
+

@@ -5,6 +5,7 @@
       <Resource Name="Config" LoadType="0" Packed="False" />
       <Resource Name="Core" LoadType="0" Packed="False" />
       <Resource Name="DataTable" LoadType="0" Packed="False" />
+      <Resource Name="DynamicAnimation" LoadType="0" Packed="False" />
       <Resource Name="Entity" LoadType="0" Packed="False" />
       <Resource Name="HotfixDlls" LoadType="0" Packed="False" />
       <Resource Name="Language" LoadType="0" Packed="False" />
@@ -22,12 +23,12 @@
       <Asset Guid="09045e73e44b1d944bafe57ece728071" ResourceName="UI" />
       <Asset Guid="0b69b108d75f47940881a60045f21976" ResourceName="UI" />
       <Asset Guid="0d39ed0185ca8e74283374bdb1c95e2b" ResourceName="Entity" />
+      <Asset Guid="11a32929f34d33f428b80aecda185b8b" ResourceName="DynamicAnimation" />
       <Asset Guid="13b0b1255d7d6cf44a4d1987723460ef" ResourceName="ScriptableAssets" />
       <Asset Guid="17809c14ab03d914fbb791e882587415" ResourceName="DataTable" />
       <Asset Guid="17c3f565cf73d4740bfaed4f87e98fa3" ResourceName="Language" />
       <Asset Guid="18868d941a71f02498051516873367ce" ResourceName="Scene" />
       <Asset Guid="18d313816561eb94f883cc5522c2158b" ResourceName="UI" />
-      <Asset Guid="1b586e20031d8b44a9495620988ad3dc" ResourceName="HotfixDlls" />
       <Asset Guid="1caa4c6fdc3281642b46f7c82c497dc5" ResourceName="Core" />
       <Asset Guid="230b0c809e3e6a647af26c803aa90467" ResourceName="SharedAssets" />
       <Asset Guid="2c78f416dca004249a1530266216114a" ResourceName="SharedAssets" />
@@ -53,6 +54,7 @@
       <Asset Guid="73d884ecdd851124aaca044feebbe87d" ResourceName="DataTable" />
       <Asset Guid="743d91e4e5cb9bc478f0ab99fbd8f7d1" ResourceName="UI" />
       <Asset Guid="74b06ad59906133448a2fe06366e4889" ResourceName="Language" />
+      <Asset Guid="7b8b206d8bc37e149b97f5433fab029f" ResourceName="HotfixDlls" />
       <Asset Guid="7fa753003c0b5b24faded9b639aabaef" ResourceName="UI" />
       <Asset Guid="81ed03a317f6d6a43aa694d24e6a8f64" ResourceName="DataTable" />
       <Asset Guid="82897f91c1a5cd041a4b54516ac60412" ResourceName="Entity" />

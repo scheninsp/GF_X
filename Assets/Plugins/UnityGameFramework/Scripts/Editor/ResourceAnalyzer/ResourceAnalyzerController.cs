@@ -132,9 +132,24 @@ namespace UnityGameFramework.Editor.ResourceTools
 
         private void AnalyzeAsset(string assetName, Asset hostAsset, DependencyData dependencyData, HashSet<string> scriptAssetNames)
         {
+            // ================= GEMINI SUGGESTED LOG =================
+            string testStr = "test_strech_squash";
+            if (assetName.Contains(testStr))
+            {
+                Debug.Log(string.Format("[GEMINI LOG] Asset '{0}' is being analyzed FBX", assetName));
+            }
+            // ========================================================
+
             string[] dependencyAssetNames = AssetDatabase.GetDependencies(assetName, false);
             foreach (string dependencyAssetName in dependencyAssetNames)
             {
+                // ================= GEMINI SUGGESTED LOG =================
+                if (dependencyAssetName.Contains(testStr))
+                {
+                    Debug.Log(string.Format("[GEMINI LOG] Asset '{0}' is being analyzed and it depends on FBX: '{1}'", assetName, dependencyAssetName));
+                }
+                // ========================================================
+
                 if (scriptAssetNames.Contains(dependencyAssetName))
                 {
                     continue;

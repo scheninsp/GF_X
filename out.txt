@@ -1,0 +1,8 @@
+ResourceAnalyzerController:AnalyzeAsset 141
+ResourceAnalyzerController:AnalyzeAsset 194
+ResourceAnalyzerController:Analyze 115
+ResourceBuilderController:BuildResources 656
+AppBuildEidtor:BuildResources 1049
+AppBuildEidtor:Update 154
+HostView:SendUpdate -1
+EditorApplication:Internal_CallUpdateFunctions -1

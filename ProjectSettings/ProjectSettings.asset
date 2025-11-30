@@ -77,7 +77,6 @@ PlayerSettings:
   androidMinimumWindowHeight: 300
   androidFullscreenMode: 1
   androidAutoRotationBehavior: 1
-  androidPredictiveBackSupport: 1
   defaultIsNativeResolution: 1
   macRetinaSupport: 1
   runInBackground: 0
@@ -694,7 +693,7 @@ PlayerSettings:
     PS5: DOTWEEN
     QNX: DOTWEEN
     Stadia: DOTWEEN
-    Standalone: AMPLIFY_SHADER_EDITOR;ENABLE_LOG;DOTWEEN
+    Standalone: AMPLIFY_SHADER_EDITOR;ENABLE_LOG;DOTWEEN;ENABLE_HYBRIDCLR;ENABLE_OBFUZ
     VisionOS: DOTWEEN
     WebGL: AMPLIFY_SHADER_EDITOR;ENABLE_LOG;DOTWEEN;DISABLE_HYBRIDCLR
     Windows Store Apps: ENABLE_LOG;DOTWEEN

@@ -103,3 +103,13 @@ MonoBehaviour:
     packed: 0
     filterType: 0
     searchPatterns: '*.asset'
+  - valid: 1
+    name: DynamicAnimation
+    variant: 
+    fileSystem: 
+    groups: 
+    assetsDirectoryPath: Assets/AAAGame/DynamicAnimation
+    loadType: 0
+    packed: 0
+    filterType: 0
+    searchPatterns: '*.fbx'
