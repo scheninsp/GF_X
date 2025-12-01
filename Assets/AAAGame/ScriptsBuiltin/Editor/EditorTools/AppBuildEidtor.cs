@@ -859,6 +859,11 @@ namespace UGF.EditorTools
             EditorUserBuildSettings.SetBuildLocation(buildOptions.target, locationPathName);
 
             buildOptions = (BuildPlayerOptions)getBuildPlayerOptions.Invoke(null, new object[] { errBuildDir, buildOptions });
+            if (AppSettings.Instance.DebugMode && AppSettings.Instance.WaitForManagedDebugger)
+            {
+                buildOptions.options |= BuildOptions.AllowDebugging;
+                buildOptions.options |= BuildOptions.WaitForPlayerConnection;
+            }
             buildOptions.locationPathName = locationPathName;
             ArrayList scenesList = new ArrayList();
             EditorBuildSettingsScene[] editorScenes = EditorBuildSettings.scenes;

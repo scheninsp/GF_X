@@ -5,14 +5,15 @@ using UnityGameFramework.Runtime;
 
 public class LoadFbxClipExample : MonoBehaviour
 {
-    public void Awake()
+    public void Start()
     {
+        Log.Info("[LoadFbxClipExample.cs] Start");
         StartCoroutine(DelayedStart());
     }
 
     private System.Collections.IEnumerator DelayedStart()
     {
-        yield return new WaitForSeconds(30);
+        yield return new WaitForSeconds(1);
         StartLoadingClip();
     }
 

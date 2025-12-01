@@ -346,6 +346,54 @@ Packed = packed;
 FileSystem，LoadType，Packed 是加载 ab 包时的策略
 
 
+### LoadType
+  LoadFromFile 和 LoadFromBinary 都是资源加载方式的选项，它们的主要区别在于如何处理 AssetBundle 文件。
+
+   1. `LoadFromFile` (从文件加载)
+       * 注释: "使用文件方式加载。"
+       * 工作方式: 这是通过 AssetBundle.LoadFromFile API 来实现的。它直接从磁盘上的文件路径加载资源包。
+       * 优点: 内存效率非常高。它不会将整个 AssetBundle
+         文件完整地读入内存，而是根据需要从磁盘流式加载数据。这是大多数情况下的首选方式。
+
+   2. `LoadFromBinary` (从二进制流加载)
+       * 注释: "使用二进制方式加载。"
+       * 工作方式: 这是通过 AssetBundle.LoadFromMemory API 实现的。它需要先将整个 AssetBundle
+         文件的内容读入一个内存中的字节数组 (byte[])，然后再从这个内存数组中加载资源包。
+       * 应用场景: 这种方式主要用于那些无法直接通过文件路径加载的场景，最典型的就是
+         资源加密。你需要先将加密的文件读入内存，解密成原始的 AssetBundle 字节数据，然后再调用
+         AssetBundle.LoadFromMemory 来加载。
+       * 缺点: 会占用更多内存，因为内存中除了有 Unity
+         加载资源所需的内存外，还有一个完整的资源包字节数组副本。
+
+  ResourceManager
+  内部维护了两套完全不同的加载逻辑：一套用于加载"资产"（Asset），另一套用于加载"二进制流"（Binary）。
+
+  1. LoadFromMemory (及其变种)
+
+   * 最终目的： 加载 Unity 资产 (Asset)。
+   * 调用接口： ResourceManager.LoadAsset() 或 ResourceManager.LoadScene()。
+   * 内部流程：
+       1. 框架将资源文件（一个 AssetBundle）的字节读入内存。
+       2. 如果 LoadType 是 LoadFromMemoryAndDecrypt 等加密类型，则执行解密。
+       3. 框架调用 AssetBundle.LoadFromMemory() 将字节数组转换成一个 AssetBundle 对象。
+       4. 从这个 AssetBundle 对象中加载出你指定的具体资产（比如 "Assets/UI/MainMenu.prefab"）。
+       5. 返回给你的是一个 GameObject、Texture2D 或 TextAsset 等 Unity 对象。
+   * 代码证据： 在 ResourceManager.ResourceLoader.cs 的 LoadAsset 方法中，代码会检查
+     resourceInfo.IsLoadFromBinary。如果为 true，则直接报错，这证明了 LoadFromBinary 不能用于加载资产。
+
+  2. LoadFromBinary (及其变种)
+
+   * 最终目的： 加载文件的原始字节 (byte[])。
+   * 调用接口： ResourceManager.LoadBinary()。
+   * 内部流程：
+       1. 框架将文件（可以是任何类型的文件，不一定是 AssetBundle）的字节读入内存。
+       2. 如果 LoadType 是 LoadFromBinaryAndDecrypt 等加密类型，则执行解密。
+       3. 加载流程结束。
+       4. 返回给你的是一个 `byte[]` 数组。你可以用这个数组去反序列化 JSON、XML，或者解析自定义的二进制数据。
+   * 代码证据： LoadBinary 方法会检查
+     !resourceInfo.IsLoadFromBinary，如果不是二进制加载类型，就会报错。这证明了 LoadAsset 和 LoadBinary
+     的路径是完全分开的。
+
 一个 Asset 对应一个具有 guid 的 Unity 资产
 一个 Asset 只能存在于一个 Resource 内
 ### Asset
@@ -527,4 +575,607 @@ private void AnalyzeAsset(string assetName, Asset hostAsset, DependencyData depe
 没有人依赖这个 fbx
 这个 fbx 唯一的 dependencyAsset 是 shader
 "Packages/com.unity.render-pipelines.universal/Shaders/Lit.shader"
+
+461s 构建
+
+# LoadAsset
+
+```
+GF.Resource.LoadAsset(
+            fbxAssetPath, 
+            typeof(AnimationClip), 
+            new LoadAssetCallbacks(
+                // 加载成功回调
+                (assetName, asset, duration, userData) =>
+                {
+                    AnimationClip loadedClip = asset as AnimationClip;
+                    if (loadedClip != null)
+                    {
+                        // 加载成功，asset 就是你要的 AnimationClip
+                        Log.Info($"Successfully loaded AnimationClip '{loadedClip.name}' length '{loadedClip.length}' from FBX '{assetName}'.");
+                    }
+                    else
+                    {
+                        Log.Error($"Loaded asset from '{assetName}' but it was not an AnimationClip.");
+                    }
+                },
+                // 加载失败回调
+                (assetName, status, errorMessage, userData) =>
+                {
+                    Log.Error($"Failed to load asset '{assetName}'. Status: {status}, Error: {errorMessage}");
+                }
+            )
+        );
+```
+
+
+LoadAsset 调用栈
+ResourceLoader:LoadAsset 308
+ResourceManager:LoadAsset 1627
+ResourceComponent:LoadAsset 1050
+ResourceComponent:LoadAsset 967
+LoadFbxClipExample:StartLoadingClip 31
+
+
+```
+LoadAssetTask mainTask = LoadAssetTask.Create(assetName, assetType, priority, resourceInfo, dependencyAssetNames, loadAssetCallbacks, userData);
+
+assetName = "Assets/AAAGame/DynamicAnimation/test_strech_squash_2020_6.fbx"
+assetType = {UnityEngine.AnimationClip}  //System.Type
+resourceInfo =
+CompressedLength 56023
+Length 56023
+FileSystemName null
+IsLoadFromBinary false
+loadType(m_LoadType) LoadFromFile
+ResourceName "DynamicAnimation.dat"
+StorageInReadOnly true
+UseFileSystem false   //这里为什么是
+
+dependencyAssetNames 空
+
+userData null
+```
+
+如果 ResourceInfo 里不是 ready 的，那么就需要去网络请求下载
+```
+if (!resourceInfo.Ready)
+{
+    m_ResourceManager.UpdateResource(resourceInfo.ResourceName);
+}
+```
+
+## UseFileSystem 的说明
+
+  在“Updatable”模式下，资源通常存储在 AssetBundle（ab 包）中。GameFramework 有两种存储资源的方式：
+   1. 作为磁盘上的独立文件： 在这种情况下，m_FileSystemName 将为 null 或空，UseFileSystem 将为false。这通常适用于直接从 Unity 编辑器加载或内置到应用程序中而未打包到自定义 GameFramework文件系统中的资源。
+   2. 在 GameFramework 文件系统内部： 这些是包含多个资源的自定义压缩/加密文件。如果资源是此类文件系统的一部分，则 m_FileSystemName 将包含该文件系统的名称，并且 UseFileSystem 将为 true。
+
+  结论：
+  对于 FBX 资源“Assets/AAAGame/DynamicAnimation/test_strech_squash_2020_6.fbx”，其ResourceInfo.UseFileSystem 为false，这意味着当此资源的 ResourceInfo 生成时（很可能是在 AssetBundle 或应用程序本身的构建过程中），它未被打包到GameFramework 文件系统中。相反，它被视为磁盘上的独立资源，即使它位于 AssetBundle 中。
+
+  GameFramework 的 ResourceMode: Updatable 主要管理下载和更新哪些 AssetBundle，但这并不一定意味着这些 AssetBundle 内部 的所有资源都始终存储在 GameFramework 的自定义文件系统中。AssetBundle 本身是 Unity 的原生打包格式。如果GameFramework 没有明确将 AssetBundle 或其内容放入其自己的 IFileSystem 实现中，那么 UseFileSystem 将保持 false。
+
+  为了证实这一点，通常会检查 GameFramework 构建设置或资源收集设置，以查看单个资源或 AssetBundle的打包配置方式。如果一个资源仅仅是“AssetBundle Packed”但未同时“File System Packed”（如果他们的特定 GameFramework配置中存在这样的区别），那么 UseFileSystem 将为 false。
+
+
+对用户问题的综合回答：
+
+用户询问了 Resource Rule Editor 配置（特别是将 `FileSystem` 字段留空）影响 `ResourceInfo.UseFileSystem` 的代码位置。
+
+以下是端到端的跟踪：
+
+1.  **Resource Rule Editor 配置：** 当您在 Resource Rule Editor 中将资源的 `FileSystem` 字段留空（例如“DynamicAnimation”）时，此配置会被存储，并最终在 GameFramework 构建过程（生成版本列表）中使用。当 GameFramework 运行时初始化或更新时，它会读取这些版本列表。
+
+2.  **资源检查阶段 (`ResourceManager.OnCheckerResourceNeedUpdate`)：** 在资源检查阶段（在“Updatable”资源模式下），`ResourceManager`（特别是其内部 `ResourceChecker` 组件）会处理版本列表。当它确定某个资源需要更新或添加时，它会调用 `OnCheckerResourceNeedUpdate`。
+    -   **代码位置：** `Assets/Plugins/UnityGameFramework/GameFramework/Resource/ResourceManager.cs`（大约第 1709 行，`OnCheckerResourceNeedUpdate` 方法）。
+    -   **解释：** 此方法接收一个 `fileSystemName` 参数。如果您在编辑器中将 `FileSystem` 字段留空，则此时的 `fileSystemName` 将是 `null` 或一个空字符串。
+
+3.  **添加到资源更新队列 (`ResourceManager.ResourceUpdater.AddResourceUpdate`)：** `OnCheckerResourceNeedUpdate` 随后将此 `fileSystemName` 传递给 `ResourceManager.ResourceUpdater.AddResourceUpdate`。
+    -   **代码位置：** `Assets/Plugins/UnityGameFramework/GameFramework/Resource/ResourceManager.ResourceUpdater.cs`（大约第 205 行，`AddResourceUpdate` 方法）。
+    -   **解释：** 此方法为资源创建一个 `UpdateInfo` 对象，并将接收到的 `fileSystemName` 存储在其 `m_FileSystemName` 成员中。
+
+4.  **`UpdateInfo` 存储 `fileSystemName`：** `UpdateInfo` 类（它保存有关需要更新的资源的临时信息）直接存储 `fileSystemName`。其 `UseFileSystem` 属性由此存储的值派生。
+    -   **代码位置：** `Assets/Plugins/UnityGameFramework/GameFramework/Resource/ResourceManager.ResourceUpdater.UpdateInfo.cs`（大约第 28 行，`UpdateInfo` 构造函数及其 `UseFileSystem` 属性）。
+    -   **解释：** 如果 `fileSystemName` 为空，则 `UpdateInfo.UseFileSystem` 将为 `false`。
+
+5.  **填充 `m_ReadWriteResourceInfos` (`ResourceManager.ResourceUpdater.ApplyResource` / `OnDownloadSuccess`)：** 当资源成功应用（从资源包）或下载时，`ResourceUpdater` 会更新主 `ResourceManager` 的 `m_ReadWriteResourceInfos` 字典。它通过创建一个 `ReadWriteResourceInfo` 对象来完成此操作。
+    -   **代码位置：**
+        -   `Assets/Plugins/UnityGameFramework/GameFramework/Resource/ResourceManager.ResourceUpdater.cs`（大约第 382 行，在 `ApplyResource` 内部）。
+        -   `Assets/Plugins/UnityGameFramework/GameFramework/Resource/ResourceManager.ResourceUpdater.cs`（大约第 664 行，在 `OnDownloadSuccess` 内部）。
+    -   **解释：** 这两个方法都创建 `ReadWriteResourceInfo` 实例，将 `fileSystemName`（从 `UpdateInfo` 或 `ApplyInfo` 对象获取）传递给其构造函数。
+
+6.  **`ReadWriteResourceInfo` 存储 `fileSystemName`：** `ReadWriteResourceInfo` 结构随后存储此 `fileSystemName`。
+    -   **代码位置：** `Assets/Plugins/UnityGameFramework/GameFramework/Resource/ResourceManager.ReadWriteResourceInfo.cs`（大约第 12 行，`ReadWriteResourceInfo` 构造函数及其 `UseFileSystem` 属性）。
+    -   **解释：** 如果 `fileSystemName` 为空，则 `ReadWriteResourceInfo.UseFileSystem` 将为 `false`。
+
+7.  **`ResourceManager.GetResourceInfo` 检索 `ResourceInfo`：** 最后，当调用 `GF.Resource.LoadAsset`（它委托给 `ResourceManager.ResourceLoader.LoadAsset`）时，`ResourceLoader` 最终会调用 `ResourceManager.GetResourceInfo`。此方法检索资产的 `ResourceInfo` 对象。这个 `ResourceInfo` 对象本身将正确反映 `UseFileSystem` 为 `false`，因为由于您的 Resource Rule Editor 配置，其 `m_FileSystemName` 在资源处理期间最初被设置为空字符串或 `null`。
+    -   **代码位置：** `Assets/Plugins/UnityGameFramework/GameFramework/Resource/ResourceManager.ResourceInfo.cs`（大约第 28 行，`ResourceInfo` 的 `UseFileSystem` 属性）。
+
+简而言之，`ResourceInfo.UseFileSystem` 为 `false` 的决定直接源于您的 Resource Rule Editor 配置中 `FileSystem` 字段留空，它通过 GameFramework 的资源管理管道（从检查/更新到最终的 `ResourceInfo` 对象）传播。
+
+至此，详细调查结束。
+
+
+
+
+# ResourceManager.ResourceLoader.LoadAsset 到 DefaultLoadResourceAgentHelper.ReadFile
+
+  总结流程图：
+```
+    1 ResourceComponent.LoadAsset (外部调用入口)
+    2       ↓
+    3 ResourceManager.ResourceLoader.LoadAsset (创建 LoadAssetTask)
+    4       ↓
+    5 m_TaskPool.AddTask (将任务加入任务池)
+    6       ↓ (TaskPool 调度)
+    7 LoadResourceAgent.Start(LoadAssetTask task) (代理开始处理任务)
+    8       ↓ (根据 ResourceInfo 判断加载类型和是否使用文件系统)
+    9 m_Helper.ReadFile(fullPath)  或  m_Helper.ReadFile(fileSystem, name) (在 DefaultLoadResourceAgentHelper
+      中实现)
+   10       ↓
+   11 DefaultLoadResourceAgentHelper (内部调用 Unity API: AssetBundle.LoadFromFileAsync 等)
+```
+
+
+
+# LoadAssetTask
+
+Assets\Plugins\UnityGameFramework\GameFramework\Resource\ResourceManager.ResourceLoader.LoadAssetTask.cs
+
+
+## ResourceLoader 怎样关联 LoadAssetTask 和 LoadResourceAgent？
+
+Assets\Plugins\UnityGameFramework\GameFramework\Base\TaskPool\TaskPool.cs
+m_TaskPool 是一个 LoadResourceTask 类型对应的 task pool
+private readonly TaskPool<LoadResourceTaskBase> m_TaskPool;
+加入 m_TaskPool 之后，ResourceLoader 会在 Update 中轮询更新
+```
+public void Update(float elapseSeconds, float realElapseSeconds)
+{
+    m_TaskPool.Update(elapseSeconds, realElapseSeconds);
+}
+```
+
+在 ResourceLoader.AddLoadResourceAgentHelper 方法中，是这样创建 LoadResourceAgent 并添加到m_TaskPool 的：
+
+```
+ LoadResourceAgent agent = new LoadResourceAgent(loadResourceAgentHelper, resourceHelper, this, readOnlyPath, readWritePath, decryptResourceCallback ??DefaultDecryptResourceCallback);
+ m_TaskPool.AddAgent(agent);
+```
+
+## TaskPool 执行
+Assets\Plugins\UnityGameFramework\GameFramework\Base\TaskPool\TaskPool.cs
+```
+//取出第一个 waiting task
+LinkedListNode<T> current = m_WaitingTasks.First;
+//存在 FreeAgent
+    while (current != null && FreeAgentCount > 0)
+    {
+        //启动 agent
+        StartTaskStatus status = agent.Start(task);
+    }
+```
+对于 LoadAssetTask 的 task pool，agent 类型就是 LoadResourceAgent
+
+
+
+## Agent开始执行 LoadResourceAgent.Start
+
+Assets\Plugins\UnityGameFramework\GameFramework\Resource\ResourceManager.ResourceLoader.LoadResourceAgent.cs
+
+
+先尝试从 AssetPool 里看是不是已经有了
+```
+AssetObject assetObject = m_ResourceLoader.m_AssetPool.Spawn(m_Task.AssetName);
+
+```
+
+他存在于的 Resource 是不是有了
+```
+ResourceObject resourceObject = m_ResourceLoader.m_ResourcePool.Spawn(resourceName);
+
+```
+
+没有的话就去读取 Resource
+UseFileSystem = false，走下面，直接调用 ab 包 AssetBundle.LoadFromFileAsync
+
+
+所以 fbx ab 包依赖 Resource ab 包的加载。每个 asset 在 unity 中的 dependency 被代替为 assetA -> assetA所在的 resource + assetA -> assetB -> assetB 所在的 resource
+
+fullPath:
+"D:/UnityProjects/GF_X/GF_X/BuildApp/StandaloneWindows64/GF_X_Data/StreamingAssets/DynamicAnimation.dat"
+
+```
+if (resourceInfo.LoadType == LoadType.LoadFromFile)
+{
+    if (resourceInfo.UseFileSystem)
+    {
+        IFileSystem fileSystem = m_ResourceLoader.m_ResourceManager.GetFileSystem(resourceInfo.FileSystemName, resourceInfo.StorageInReadOnly);
+        m_Helper.ReadFile(fileSystem, resourceInfo.ResourceName.FullName);
+    }
+    else
+    {
+        m_Helper.ReadFile(fullPath);
+    }
+}
+```
+正常情况下，resourceInfo.UseFileSystem 应当 = true
+使用 offset 来读取一个 文件系统中的 文件的 offset 部分
+```
+public override void ReadFile(IFileSystem fileSystem, string name)
+{
+    FileInfo fileInfo = fileSystem.GetFileInfo(name);
+    m_FileFullPath = fileSystem.FullPath;
+    m_FileName = name;
+    m_FileAssetBundleCreateRequest = AssetBundle.LoadFromFileAsync(fileSystem.FullPath, 0u, (ulong)fileInfo.Offset);
+}
+```
+
+
+
+## 读取资源文件 DefaultLoadResourceAgentHelper.ReadFile
+这里是 DynamicAnimation.dat
+
+```
+/// <summary>
+/// 通过加载资源代理辅助器开始异步读取资源文件。
+/// </summary>
+/// <param name="fullPath">要加载资源的完整路径名。</param>
+public override void ReadFile(string fullPath)
+{
+    if (m_LoadResourceAgentHelperReadFileCompleteEventHandler == null || m_LoadResourceAgentHelperUpdateEventHandler == null || m_LoadResourceAgentHelperErrorEventHandler == null)
+    {
+        Log.Fatal("Load resource agent helper handler is invalid.");
+        return;
+    }
+
+    m_FileFullPath = fullPath;
+    m_FileAssetBundleCreateRequest = AssetBundle.LoadFromFileAsync(fullPath);
+    
+
+}
+```
+
+注意对于 resource 文件使用的是 
+LoadFromFileAsync 而不是 LoadAssetAsync
+
+
+
+## 资源读取完成 OnLoadResourceAgentHelperReadFileComplete 
+
+
+```
+LoadResourceAgent:OnLoadResourceAgentHelperReadFileComplete 296
+DefaultLoadResourceAgentHelper:UpdateFileAssetBundleCreateRequest 500
+DefaultLoadResourceAgentHelper:Update 407
+```
+
+```
+private void OnLoadResourceAgentHelperReadFileComplete(object sender, LoadResourceAgentHelperReadFileCompleteEventArgs e)
+{
+//创建资源对象，ResourceObject类型
+    ResourceObject resourceObject = ResourceObject.Create(m_Task.ResourceInfo.ResourceName.Name, e.Resource, m_ResourceHelper, m_ResourceLoader);
+    
+//把资源对象注册到 ResourcePool 
+    m_ResourceLoader.m_ResourcePool.Register(resourceObject, true);
+    s_LoadingResourceNames.Remove(m_Task.ResourceInfo.ResourceName.Name);
+    
+//调用 m_Task.LoadMain(LoadResourceAgent, resourceObject)，继续处理具体要加载的资产（fbx)
+    OnResourceObjectReady(resourceObject);
+}
+```
+
+
+
+## 创建资源对象
+Assets\Plugins\UnityGameFramework\GameFramework\Resource\ResourceManager.ResourceLoader.ResourceObject.cs
+```
+public static ResourceObject Create(string name, object target, IResourceHelper resourceHelper, ResourceLoader resourceLoader)
+{
+    ResourceObject resourceObject = ReferencePool.Acquire<ResourceObject>();
+    resourceObject.Initialize(name, target);
+    //name = "DynamicAnimation"
+    //target = "dynamicanimation (UnityEngine.AssetBundle)"
+
+    resourceObject.m_ResourceHelper = resourceHelper;
+    resourceObject.m_ResourceLoader = resourceLoader;
+    return resourceObject;
+}
+```
+这里的 target 的类型，说明 DynamicAnimation 这个 Resource 就是一个 AssetBundle
+
+
+## m_Task.LoadMain
+Assets\Plugins\UnityGameFramework\GameFramework\Resource\ResourceManager.ResourceLoader.LoadResourceTaskBase.cs
+```
+ agent.Helper.LoadAsset(resourceObject.Target, AssetName, AssetType, IsScene);
+```
+这里的 Helper 就是 DefaultLoadResourceAgentHelper
+**到这里完成  ResourceManager.ResourceLoader.LoadAsset 到 DefaultLoadResourceAgentHelper.ReadFile 的链路**
+
+```
+public override void LoadAsset(object resource, string assetName, Type assetType, bool isScene)
+{
+//把刚才加载的 DynamicAnimation Resource 转换为 assetBundle
+//这里的参数 resource 就是刚才创建的资源对象 ResourceObject
+            AssetBundle assetBundle = resource as AssetBundle;
+
+//这里 assetName = "Assets/AAAGame/DynamicAnimation/test_strech_squash_2020_6.fbx"
+            m_AssetName = assetName;
+
+//真正调用 AssetBundle Load 去加载 ab
+// assetType = {UnityEngine.AnimationClip}
+            m_AssetBundleRequest = assetBundle.LoadAssetAsync(assetName, assetType);
+
+//Request 会被缓存在 m_AssetBundleRequest 中，然后在 UpdateAssetBundleRequest 时轮询是否完成加载
+
+}
+
+```
+
+## DefaultLoadResourceAgentHelper.UpdateAssetBundleRequest
+
+```
+LoadResourceAgentHelperLoadCompleteEventArgs loadResourceAgentHelperLoadCompleteEventArgs = LoadResourceAgentHelperLoadCompleteEventArgs.Create(m_AssetBundleRequest.asset);
+// 把加载好的 Asset 引用传给 loadResourceAgentHelperLoadCompleteEventArgs
+// loadResourceAgentHelperLoadCompleteEventArgs.Asset = asset;
+
+
+m_LoadResourceAgentHelperLoadCompleteEventHandler(this, loadResourceAgentHelperLoadCompleteEventArgs);
+
+ReferencePool.Release(loadResourceAgentHelperLoadCompleteEventArgs);
+m_AssetName = null;
+m_LastProgress = 0f;
+m_AssetBundleRequest = null;
+```
+
+
+## 在 TaskPool 初始化的时候，已经为 LoadResourceAgent 分配了回调
+
+```
+//LoadResourceAgent
+public void Initialize()
+{
+     m_Helper.LoadResourceAgentHelperLoadComplete += OnLoadResourceAgentHelperLoadComplete;
+
+}
+```
+
+Helper 的 m_LoadResourceAgentHelperLoadCompleteEventHandler = LoadResourceAgentHelperLoadComplete
+
+## 回调 OnLoadResourceAgentHelperLoadComplete
+
+```
+private void OnLoadResourceAgentHelperLoadComplete(object sender, LoadResourceAgentHelperLoadCompleteEventArgs e)
+//sender : DefaultLoadResourceAgentHelper
+//LoadResourceAgentHelperLoadCompleteEventArgs.asset  加载完的 fbx 资产
+{
+    
+//查看是否有 dependencyAssets
+    List<object> dependencyAssets = m_Task.GetDependencyAssets();
+
+//创建 AssetObject
+//ResourceManager.ResourceLoader.AssetObject
+    assetObject = AssetObject.Create(m_Task.AssetName, e.Asset, dependencyAssets, m_Task.ResourceObject.Target, m_ResourceHelper, m_ResourceLoader);
+
+//注册到AssetPool, AssetToResourceMap
+    m_ResourceLoader.m_AssetPool.Register(assetObject, true);
+    m_ResourceLoader.m_AssetToResourceMap.Add(e.Asset, m_Task.ResourceObject.Target);
+
+//如果 dependencyAsset 中有资产依赖其他的 ResouceB，那么让当前的 ResourceA 也依赖 ResourceB
+foreach (object dependencyAsset in dependencyAssets)
+{
+    object dependencyResource = null;
+    if (m_ResourceLoader.m_AssetToResourceMap.TryGetValue(dependencyAsset, out dependencyResource))
+    {
+        m_Task.ResourceObject.AddDependencyResource(dependencyResource);
+    }
+}
+
+//回调资产加载时输入的自定义回调
+OnAssetObjectReady(assetObject);
+
+// object asset = assetObject.Target;  //真正返回的 asset 类型（AnimationClip）对象
+//m_Task.OnLoadAssetSuccess(this, asset, (float)(DateTime.UtcNow - m_Task.StartTime).TotalSeconds);
+
+}
+```
+
+
+# 最终回调 LoadAssetTask OnLoadAssetSuccess 
+```
+public override void OnLoadAssetSuccess(LoadResourceAgent agent, object asset, float duration)
+{
+    base.OnLoadAssetSuccess(agent, asset, duration);   //空函数
+    
+//m_LoadAssetCallbacks 中有对应 Asset 加载各种情况的 callback，这里是 success
+//LoadAssetSuccessCallback 就是传入的自定义成功后 cb
+    if (m_LoadAssetCallbacks.LoadAssetSuccessCallback != null)
+    {
+        m_LoadAssetCallbacks.LoadAssetSuccessCallback(AssetName, asset, duration, UserData);
+        
+//AssetName = "Assets/AAAGame/DynamicAnimation/test_strech_squash_2020_6.fbx"
+//asset : AnimationClip Object
+//duration : 13929
+//UserData : null
+    }
+}
+```
+
+回调堆栈
+```
+Void <>c:<StartLoadingClip>b__2_0 (String, Object, Single, Object)+0x1 at LoadFbxClipExample 38
+LoadAssetTask:OnLoadAssetSuccess 52
+LoadResourceAgent:OnAssetObjectReady 271
+LoadResourceAgent:OnLoadResourceAgentHelperLoadComplete 351
+DefaultLoadResourceAgentHelper:UpdateAssetBundleRequest 570
+DefaultLoadResourceAgentHelper:Update 409
+```
+
+
+
+查看代码说明，为什么GameFramework 打包过程中，要在 ab 包的基础上再额外使用一种 dat                        
+文件？在没有任何加密的情况下，使用LoadFromFile去打 ResourceEditor 中的各个资源，例如                        dynanmicAnimation.dat，这个dat文件其中包含了多少 ab 包？test_strech_squash_2020_6.fbx 这个 fbx 文件被打成 ab 包之后，直接存放于 dat 文件内部吗？为什么加载时先把 dynamicAnimation.dat 作为 ab 包加载，然后又去加载 fbx 文件的 ab 包呢？ 
+
+
+
+# Http服务器上的文件和 StreamingAssets 中的同前缀文件的关系
+
+GF_X\BuildApp\StandaloneWindows64\GF_X_Data\StreamingAssets
+DynamicAnimation.dat 的开头是 UnityFS    5.x.x 2022.3.55f1c1，说明他符合 ab 包格式。
+Entity.dat 开头也是 UnityFS，尽管他包含了多个 prefab 在内，但他也是符合 ab 包格式
+
+GF_X\AB\Full\1_0_0_1\Windows64\DynamicAnimation.8254ae21.dat
+GF_X\AB\Full\1_0_0_1\Windows64\Entity.50584b9d.dat
+这两个文件里面都是乱码，说明他们不是 ab 包格式。
+
+当我标记为 Updatable 打包的时候，StreamingAssets 应当是去我架设的本地 http 服务器中下载？我的 http 服务器中映射了 1_0_0_1 文件夹。
+
+尝试说明从  1_0_0_1\Windows64 中的文件到 StreamingAssets 过程中为什么会发生变化？或者说 StreamingAssets 根本没有走下载？
+
+
+
+   1. 构建目录 (`AB\Full\1_0_0_1\Windows64`):
+       * 这是资源构建（Build Resource）过程的直接产物。
+       * 默认情况下，为了防止资源被轻易解包和盗用，GameFramework会对生成的AssetBundle（AB包）进行加密或偏移处理。
+         这就是为什么你直接用文本编辑器打开这些.dat文件会看到“乱码”，并且找不到"UnityFS"文件头。它们本质上仍然是AB包，只是被“加工”过。
+
+   2. 随包资源目录 (`StreamingAssets`):
+       * 这是构建应用（Build App）时，从上述构建目录中拷贝过来的。这些资源将作为你应用的“初始版本”或“基础包”。
+       * 当应用启动时，它会首先从这个只读的StreamingAssets目录中加载必要的资源。
+       * 在拷贝过程中，GameFramework会进行一次处理，解密或恢复偏移，将它们还原成标准的AB包格式。这就是为什么你在StreamingAssets里的.dat文件中能看到"UnityFS"文件头。
+       
+
+AssetStudio 对于这两种文件都能打开，说明他们都是可识别的 ab 包格式。
+
+
+# 关卡实体的加载
+
+调用栈
+```
+LoadAssetTask:Create 35
+ResourceLoader:LoadAsset 334
+ResourceManager:LoadAsset 1604
+EntityManager:ShowEntity 651
+EntityComponent:ShowEntity 494
+EntityComponent:ShowEntity 474
+EntityExtension:ShowEntity 178
+EntityExtension:ShowEntity 193
+AwaitExtension:ShowEntityAwait 90
+d__10:MoveNext 87
+MenuProcedure:OnEnter 24
+1:ChangeState 585
+1:ChangeState 562
+1:ChangeState 81
+ChangeSceneProcedure:OnUpdate 62
+1:Update 545
+FsmManager:Update 78
+GameFrameworkEntry:Update 29
+BaseComponent:Update 231
+```
+
+## MenuProcedure
+```
+protected override void OnEnter(IFsm<IProcedureManager> procedureOwner)
+{
+        ShowLevel();//加载关卡
+}
+```
+
+
+## 关卡 prefab
+```
+public async void ShowLevel()
+    {
+...
+//创建关卡对应的 prefab
+        var lvParams = EntityParams.Create(Vector3.zero, Vector3.zero, Vector3.one);
+        lvParams.Set(LevelEntity.P_LevelData, lvRow);
+        
+//LvPfbName = "Lv_1"
+        lvEntity = await GF.Entity.ShowEntityAwait<LevelEntity>(lvRow.LvPfbName, Const.EntityGroup.Level, lvParams) as LevelEntity;
+        
+    }
+```
+
+```
+/// <summary>
+/// 显示实体。
+/// </summary>
+/// <typeparam name="T">实体逻辑类型。</typeparam>
+/// <param name="entityId">实体编号。</param>
+/// <param name="entityAssetName">实体资源名称。</param>
+/// <param name="entityGroupName">实体组名称。</param>
+/// <param name="priority">加载实体资源的优先级。</param>
+/// <param name="userData">用户自定义数据。</param>
+public void ShowEntity<T>(int entityId, string entityAssetName, string entityGroupName, int priority, object userData) where T : EntityLogic
+{
+    ShowEntity(entityId, typeof(T), entityAssetName, entityGroupName, priority, userData);
+}
+entityAssetName = "Assets/AAAGame/Prefabs/Entity/Lv_1.prefab"
+```
+
+## 关卡实体关联加载 Entity.dat
+
+m_Task.AssetName = "Assets/AAAGame/Prefabs/Entity/Lv_1.prefab"
+resourceInfo.ResourceName = "Entity.dat"
+resourceInfo.ResourceName.Name = "Entity"
+Entity.dat 走的也是 UseFileSystem = false。
+
+
+
+  所以，整个流程可以简化为两个核心的异步步骤：
+
+AssetBundle.LoadFromFileAsync(...)：将整个 Entity.dat 文件加载为内存中的 AssetBundle 对象。
+AssetBundle.LoadAssetAsync<GameObject>("xxx.prefab")：从上一步得到的 AssetBundle 对象中，异步提取出单个 GameObject 资产。
+
+
+# MyPlayer.prefab 的加载
+
+
+## ShowEntity
+```
+public void ShowEntity(int entityId, string entityAssetName, string entityGroupName, int priority, object userData)
+{
+     m_ResourceManager.LoadAsset(entityAssetName, priority, m_LoadAssetCallbacks, ShowEntityInfo.Create(serialId, entityId, entityGroup, userData));
+
+}
+
+```
+entityId = 4
+entityAssetName = "Assets/AAAGame/Prefabs/Entity/MyPlayer.prefab"
+userData 里带了出生时需要的信息，例如 position, rotation, attachToEntity
+
+
+
+## LoadAssetTask 创建
+```
+LoadAssetTask:Create 35
+ResourceLoader:LoadAsset 334
+ResourceManager:LoadAsset 1604
+EntityManager:ShowEntity 651
+EntityComponent:ShowEntity 494
+EntityComponent:ShowEntity 474
+EntityExtension:ShowEntity 178
+EntityExtension:ShowEntity 193
+AwaitExtension:ShowEntityAwait 90
+d__13:MoveNext 48
+Entity:OnShow 166
+EntityManager:InternalShowEntity 1179
+EntityManager:LoadAssetSuccessCallback 1264
+LoadAssetTask:OnLoadAssetSuccess 52
+LoadResourceAgent:OnAssetObjectReady 271
+LoadResourceAgent:OnLoadResourceAgentHelperLoadComplete 351
+DefaultLoadResourceAgentHelper:UpdateAssetBundleRequest 570
+DefaultLoadResourceAgentHelper:Update 409
+```
+
+assetName = "Assets/AAAGame/Prefabs/Entity/MyPlayer.prefab"
+assetType = null
+resourceInfo
+FileSystemName = null
+loadType = LoadFromFile
+ResourceName = "Entity.dat"
+
 

@@ -12,10 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b0c2169ebff9744c96d1933e54493ce, type: 3}
   m_Name: AppSettings
   m_EditorClassIdentifier: 
-  DebugMode: 1
-  ResourceMode: 2
-  CheckVersionUrl: http://127.0.0.1:8080/1_0_0_1/
-  DesignResolution: {x: 1080, y: 2340}
-  EncryptAOTDlls:
-  - Builtin.Runtime
-  - UnityGameFramework.Runtime
+  DebugMode: 0
+  WaitForManagedDebugger: 0
+  ResourceMode: 1
+  CheckVersionUrl: http://localhost/1_0_0_1/
+  DesignResolution: {x: 750, y: 1334}
+  EncryptAOTDlls: []

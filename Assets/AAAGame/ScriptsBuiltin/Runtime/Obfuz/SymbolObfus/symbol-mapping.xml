@@ -19,9 +19,6 @@
       <field signature="int $Obfuz$RVA_Value15" newName="$qF" />
       <field signature="int $Obfuz$RVA_Value16" newName="$QF" />
       <field signature="int $Obfuz$RVA_Value17" newName="$rF" />
-      <field signature="int $Obfuz$RVA_Value18" newName="$RF" />
-      <field signature="int $Obfuz$RVA_Value19" newName="$sF" />
-      <field signature="int $Obfuz$RVA_Value20" newName="$SF" />
     </type>
     <type fullName="$Obfuz$ProxyCall" newFullName="$Bb" status="Renamed">
       <method signature="[Builtin.Runtime]AppSettings $Obfuz$ProxyCall::@$Obfuz$Dispatch_22824_10354594(int)" newName="$nk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_22824_10354594(Int32)" newStackTraceSignature="$Bb:$nk(Int32)" />
@@ -32,7 +29,6 @@
       <method signature="[GameFramework]GameFramework.Resource.ResourceMode $Obfuz$ProxyCall::@$Obfuz$Dispatch_11150_4477243(object, int)" newName="$Pk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_11150_4477243(Object, Int32)" newStackTraceSignature="$Bb:$Pk(Object, Int32)" />
       <method signature="[HybridCLR.Runtime]HybridCLR.LoadImageErrorCode $Obfuz$ProxyCall::@$Obfuz$Dispatch_27714_15112779(object, byte[], int)" newName="$qk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_27714_15112779(Object, Byte[], Int32)" newStackTraceSignature="$Bb:$qk(Object, Byte[], Int32)" />
       <method signature="[HybridCLR.Runtime]HybridCLR.LoadImageErrorCode $Obfuz$ProxyCall::@$Obfuz$Dispatch_54639_15112779(byte[], int, int)" newName="$Qk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_54639_15112779(Byte[], Int32, Int32)" newStackTraceSignature="$Bb:$Qk(Byte[], Int32, Int32)" />
-      <method signature="[ICSharpCode.SharpZipLib]ICSharpCode.SharpZipLib.Zip.ZipEntry $Obfuz$ProxyCall::@$Obfuz$Dispatch_11150_11066505(object, int)" newName="$rk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_11150_11066505(Object, Int32)" newStackTraceSignature="$Bb:$rk(Object, Int32)" />
       <method signature="[Builtin.Runtime]LoadHotfixDllEventArgs $Obfuz$ProxyCall::@$Obfuz$Dispatch_21712_10094503(object, object, object, object, int)" newName="$Rk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_21712_10094503(Object, Object, Object, Object, Int32)" newStackTraceSignature="$Bb:$Rk(Object, Object, Object, Object, Int32)" />
       <method signature="[Builtin.Runtime]LoadHotfixDllEventArgs $Obfuz$ProxyCall::@$Obfuz$Dispatch_22824_10094503(int)" newName="$sk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_22824_10094503(Int32)" newStackTraceSignature="$Bb:$sk(Int32)" />
       <method signature="bool $Obfuz$ProxyCall::@$Obfuz$Dispatch_11150_12616511(object, int)" newName="$Sk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_11150_12616511(Object, Int32)" newStackTraceSignature="$Bb:$Sk(Object, Int32)" />
@@ -40,31 +36,20 @@
       <method signature="byte[] $Obfuz$ProxyCall::@$Obfuz$Dispatch_11150_130600(object, int)" newName="$Tk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_11150_130600(Object, Int32)" newStackTraceSignature="$Bb:$Tk(Object, Int32)" />
       <method signature="byte[] $Obfuz$ProxyCall::@$Obfuz$Dispatch_30928_130600(byte[], byte[], int)" newName="$uk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_30928_130600(Byte[], Byte[], Int32)" newStackTraceSignature="$Bb:$uk(Byte[], Byte[], Int32)" />
       <method signature="System.Collections.Generic.List`1&lt;string&gt; $Obfuz$ProxyCall::@$Obfuz$Dispatch_11150_12724855(object, int)" newName="$Uk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_11150_12724855(Object, Int32)" newStackTraceSignature="$Bb:$Uk(Object, Int32)" />
-      <method signature="double $Obfuz$ProxyCall::@$Obfuz$Dispatch_5564_12054002(double, double, int)" newName="$vk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_5564_12054002(Double, Double, Int32)" newStackTraceSignature="$Bb:$vk(Double, Double, Int32)" />
       <method signature="int $Obfuz$ProxyCall::@$Obfuz$Dispatch_11150_12091355(object, int)" newName="$Vk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_11150_12091355(Object, Int32)" newStackTraceSignature="$Bb:$Vk(Object, Int32)" />
       <method signature="int $Obfuz$ProxyCall::@$Obfuz$Dispatch_46378_12091355(int, int, int)" newName="$wk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_46378_12091355(Int32, Int32, Int32)" newStackTraceSignature="$Bb:$wk(Int32, Int32, Int32)" />
       <method signature="int $Obfuz$ProxyCall::@$Obfuz$Dispatch_50754_12091355(object, object, object, int)" newName="$Wk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_50754_12091355(Object, Object, Object, Int32)" newStackTraceSignature="$Bb:$Wk(Object, Object, Object, Int32)" />
-      <method signature="int $Obfuz$ProxyCall::@$Obfuz$Dispatch_59003_12091355(float, int)" newName="$xk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_59003_12091355(Single, Int32)" newStackTraceSignature="$Bb:$xk(Single, Int32)" />
       <method signature="long $Obfuz$ProxyCall::@$Obfuz$Dispatch_11150_7551190(object, int)" newName="$Xk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_11150_7551190(Object, Int32)" newStackTraceSignature="$Bb:$Xk(Object, Int32)" />
       <method signature="object $Obfuz$ProxyCall::@$Obfuz$Dispatch_11150_10087402(object, int)" newName="$yk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_11150_10087402(Object, Int32)" newStackTraceSignature="$Bb:$yk(Object, Int32)" />
       <method signature="System.Reflection.Assembly $Obfuz$ProxyCall::@$Obfuz$Dispatch_11150_10709164(object, int)" newName="$Yk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_11150_10709164(Object, Int32)" newStackTraceSignature="$Bb:$Yk(Object, Int32)" />
       <method signature="float $Obfuz$ProxyCall::@$Obfuz$Dispatch_11150_3119315(object, int)" newName="$zk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_11150_3119315(Object, Int32)" newStackTraceSignature="$Bb:$zk(Object, Int32)" />
-      <method signature="float $Obfuz$ProxyCall::@$Obfuz$Dispatch_13194_3119315([UnityEngine.CoreModule]UnityEngine.Vector3, [UnityEngine.CoreModule]UnityEngine.Vector3, int)" newName="$Zk" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_13194_3119315(Vector3, Vector3, Int32)" newStackTraceSignature="$Bb:$Zk(Vector3, Vector3, Int32)" />
-      <method signature="float $Obfuz$ProxyCall::@$Obfuz$Dispatch_47418_3119315(float, float, int)" newName="$aK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_47418_3119315(Single, Single, Int32)" newStackTraceSignature="$Bb:$aK(Single, Single, Int32)" />
-      <method signature="float $Obfuz$ProxyCall::@$Obfuz$Dispatch_59003_3119315(float, int)" newName="$AK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_59003_3119315(Single, Int32)" newStackTraceSignature="$Bb:$AK(Single, Int32)" />
       <method signature="string $Obfuz$ProxyCall::@$Obfuz$Dispatch_11150_11558398(object, int)" newName="$bK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_11150_11558398(Object, Int32)" newStackTraceSignature="$Bb:$bK(Object, Int32)" />
       <method signature="string $Obfuz$ProxyCall::@$Obfuz$Dispatch_17613_11558398(string[], int)" newName="$BK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_17613_11558398(String[], Int32)" newStackTraceSignature="$Bb:$BK(String[], Int32)" />
       <method signature="string $Obfuz$ProxyCall::@$Obfuz$Dispatch_19129_11558398(object, float, int)" newName="$cK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_19129_11558398(Object, Single, Int32)" newStackTraceSignature="$Bb:$cK(Object, Single, Int32)" />
       <method signature="string $Obfuz$ProxyCall::@$Obfuz$Dispatch_2052_11558398(byte[], int)" newName="$CK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_2052_11558398(Byte[], Int32)" newStackTraceSignature="$Bb:$CK(Byte[], Int32)" />
       <method signature="string $Obfuz$ProxyCall::@$Obfuz$Dispatch_22824_11558398(int)" newName="$dK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_22824_11558398(Int32)" newStackTraceSignature="$Bb:$dK(Int32)" />
-      <method signature="string $Obfuz$ProxyCall::@$Obfuz$Dispatch_25763_11558398(int, int)" newName="$DK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_25763_11558398(Int32, Int32)" newStackTraceSignature="$Bb:$DK(Int32, Int32)" />
-      <method signature="string $Obfuz$ProxyCall::@$Obfuz$Dispatch_3304_11558398(object, long, int)" newName="$eK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_3304_11558398(Object, Int64, Int32)" newStackTraceSignature="$Bb:$eK(Object, Int64, Int32)" />
-      <method signature="string $Obfuz$ProxyCall::@$Obfuz$Dispatch_33246_11558398(char[], int)" newName="$EK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_33246_11558398(Char[], Int32)" newStackTraceSignature="$Bb:$EK(Char[], Int32)" />
       <method signature="string $Obfuz$ProxyCall::@$Obfuz$Dispatch_36812_11558398(object, object, int)" newName="$fK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_36812_11558398(Object, Object, Int32)" newStackTraceSignature="$Bb:$fK(Object, Object, Int32)" />
       <method signature="string $Obfuz$ProxyCall::@$Obfuz$Dispatch_413_11558398(object, object, object[], int)" newName="$FK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_413_11558398(Object, Object, Object[], Int32)" newStackTraceSignature="$Bb:$FK(Object, Object, Object[], Int32)" />
-      <method signature="string $Obfuz$ProxyCall::@$Obfuz$Dispatch_50754_11558398(object, object, object, int)" newName="$gK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_50754_11558398(Object, Object, Object, Int32)" newStackTraceSignature="$Bb:$gK(Object, Object, Object, Int32)" />
-      <method signature="string $Obfuz$ProxyCall::@$Obfuz$Dispatch_51425_11558398(object, int, int)" newName="$GK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_51425_11558398(Object, Int32, Int32)" newStackTraceSignature="$Bb:$GK(Object, Int32, Int32)" />
-      <method signature="string $Obfuz$ProxyCall::@$Obfuz$Dispatch_59003_11558398(float, int)" newName="$hK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_59003_11558398(Single, Int32)" newStackTraceSignature="$Bb:$hK(Single, Int32)" />
       <method signature="string $Obfuz$ProxyCall::@$Obfuz$Dispatch_65367_11558398(object, object, int, int)" newName="$HK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_65367_11558398(Object, Object, Int32, Int32)" newStackTraceSignature="$Bb:$HK(Object, Object, Int32, Int32)" />
       <method signature="System.Type $Obfuz$ProxyCall::@$Obfuz$Dispatch_11150_712727(object, int)" newName="$iK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_11150_712727(Object, Int32)" newStackTraceSignature="$Bb:$iK(Object, Int32)" />
       <method signature="void $Obfuz$ProxyCall::@$Obfuz$Dispatch_11150_4780505(object, int)" newName="$IK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_11150_4780505(Object, Int32)" newStackTraceSignature="$Bb:$IK(Object, Int32)" />
@@ -82,12 +67,9 @@
       <method signature="void $Obfuz$ProxyCall::@$Obfuz$Dispatch_49321_4780505(object, int, long, object, int)" newName="$OK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_49321_4780505(Object, Int32, Int64, Object, Int32)" newStackTraceSignature="$Bb:$OK(Object, Int32, Int64, Object, Int32)" />
       <method signature="void $Obfuz$ProxyCall::@$Obfuz$Dispatch_50754_4780505(object, object, object, int)" newName="$pK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_50754_4780505(Object, Object, Object, Int32)" newStackTraceSignature="$Bb:$pK(Object, Object, Object, Int32)" />
       <method signature="void $Obfuz$ProxyCall::@$Obfuz$Dispatch_51425_4780505(object, int, int)" newName="$PK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_51425_4780505(Object, Int32, Int32)" newStackTraceSignature="$Bb:$PK(Object, Int32, Int32)" />
-      <method signature="void $Obfuz$ProxyCall::@$Obfuz$Dispatch_52007_4780505(object, object[], int)" newName="$qK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_52007_4780505(Object, Object[], Int32)" newStackTraceSignature="$Bb:$qK(Object, Object[], Int32)" />
       <method signature="void $Obfuz$ProxyCall::@$Obfuz$Dispatch_52393_4780505(byte, int)" newName="$QK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_52393_4780505(Byte, Int32)" newStackTraceSignature="$Bb:$QK(Byte, Int32)" />
       <method signature="void $Obfuz$ProxyCall::@$Obfuz$Dispatch_58859_4780505(object, object, object, object, int, int)" newName="$rK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_58859_4780505(Object, Object, Object, Object, Int32, Int32)" newStackTraceSignature="$Bb:$rK(Object, Object, Object, Object, Int32, Int32)" />
-      <method signature="void $Obfuz$ProxyCall::@$Obfuz$Dispatch_65528_4780505(object, System.DateTime, int)" newName="$RK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_65528_4780505(Object, DateTime, Int32)" newStackTraceSignature="$Bb:$RK(Object, DateTime, Int32)" />
       <method signature="[Unity.TextMeshPro]TMPro.TextMeshProUGUI $Obfuz$ProxyCall::@$Obfuz$Dispatch_11150_4308269(object, int)" newName="$sK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_11150_4308269(Object, Int32)" newStackTraceSignature="$Bb:$sK(Object, Int32)" />
-      <method signature="[UnityEngine.CoreModule]UnityEngine.Color $Obfuz$ProxyCall::@$Obfuz$Dispatch_63457_7536978([UnityEngine.CoreModule]UnityEngine.Color, float, int)" newName="$SK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_63457_7536978(Color, Single, Int32)" newStackTraceSignature="$Bb:$SK(Color, Single, Int32)" />
       <method signature="[UnityEngine.CoreModule]UnityEngine.GameObject $Obfuz$ProxyCall::@$Obfuz$Dispatch_11150_11979780(object, int)" newName="$tK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_11150_11979780(Object, Int32)" newStackTraceSignature="$Bb:$tK(Object, Int32)" />
       <method signature="[UnityEngine.CoreModule]UnityEngine.TextAsset[] $Obfuz$ProxyCall::@$Obfuz$Dispatch_11150_3362361(object, int)" newName="$TK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_11150_3362361(Object, Int32)" newStackTraceSignature="$Bb:$TK(Object, Int32)" />
       <method signature="[UnityEngine.UI]UnityEngine.UI.Button/ButtonClickedEvent $Obfuz$ProxyCall::@$Obfuz$Dispatch_11150_10350119(object, int)" newName="$uK" oldStackTraceSignature="$Obfuz$ProxyCall:$Obfuz$Dispatch_11150_10350119(Object, Int32)" newStackTraceSignature="$Bb:$uK(Object, Int32)" />
@@ -232,67 +214,6 @@
       <method signature="string UpdateResourcesProcedure/DownloadProgressData::get_Name([Builtin.Runtime]UpdateResourcesProcedure/DownloadProgressData)" newName="$Jk" oldStackTraceSignature="DownloadProgressData:get_Name()" newStackTraceSignature="DownloadProgressData:$Jk()" />
       <method signature="int UpdateResourcesProcedure/DownloadProgressData::get_Length([Builtin.Runtime]UpdateResourcesProcedure/DownloadProgressData)" newName="$kk" oldStackTraceSignature="DownloadProgressData:get_Length()" newStackTraceSignature="DownloadProgressData:$kk()" />
       <method signature="void UpdateResourcesProcedure/DownloadProgressData::set_Length([Builtin.Runtime]UpdateResourcesProcedure/DownloadProgressData, int)" newName="$Kk" oldStackTraceSignature="DownloadProgressData:set_Length(Int32)" newStackTraceSignature="DownloadProgressData:$Kk(Int32)" />
-    </type>
-    <type fullName="UtilityBuiltin" newFullName="$uA" status="Renamed">
-      <field signature="int m_EntityId" newName="$Zf" />
-      <method signature="int UtilityBuiltin::@GenerateEntityId()" newName="$zj" oldStackTraceSignature="UtilityBuiltin:GenerateEntityId()" newStackTraceSignature="$uA:$zj()" />
-      <method signature="string UtilityBuiltin::@GetTimeStamp()" newName="$Zj" oldStackTraceSignature="UtilityBuiltin:GetTimeStamp()" newStackTraceSignature="$uA:$Zj()" />
-    </type>
-    <type fullName="UtilityBuiltin/ArrayExt" newFullName="$uA/$xA" status="Renamed">
-      <method signature="void UtilityBuiltin/ArrayExt::@Disorder`1(System.Collections.Generic.List`1&lt;!!0&gt;&amp;)" newName="$lJ" oldStackTraceSignature="ArrayExt:Disorder(List`1&amp;)" newStackTraceSignature="$xA:$lJ(List`1&amp;)" />
-    </type>
-    <type fullName="UtilityBuiltin/AssetsPath" newFullName="$uA/$vA" status="Renamed">
-      <method signature="string UtilityBuiltin/AssetsPath::@GetCombinePath(string[])" newName="$bJ" oldStackTraceSignature="AssetsPath:GetCombinePath(String[])" newStackTraceSignature="$vA:$bJ(String[])" />
-      <method signature="string UtilityBuiltin/AssetsPath::@GetDataTablePath(string, bool)" newName="$BJ" oldStackTraceSignature="AssetsPath:GetDataTablePath(String, Boolean)" newStackTraceSignature="$vA:$BJ(String, Boolean)" />
-      <method signature="string UtilityBuiltin/AssetsPath::@GetSoundPath(string)" newName="$cJ" oldStackTraceSignature="AssetsPath:GetSoundPath(String)" newStackTraceSignature="$vA:$cJ(String)" />
-      <method signature="string UtilityBuiltin/AssetsPath::@GetScenePath(string)" newName="$CJ" oldStackTraceSignature="AssetsPath:GetScenePath(String)" newStackTraceSignature="$vA:$CJ(String)" />
-      <method signature="string UtilityBuiltin/AssetsPath::@GetEntityPath(string)" newName="$dJ" oldStackTraceSignature="AssetsPath:GetEntityPath(String)" newStackTraceSignature="$vA:$dJ(String)" />
-      <method signature="string UtilityBuiltin/AssetsPath::@GetUIFormPath(string)" newName="$DJ" oldStackTraceSignature="AssetsPath:GetUIFormPath(String)" newStackTraceSignature="$vA:$DJ(String)" />
-      <method signature="string UtilityBuiltin/AssetsPath::@GetTexturePath(string)" newName="$eJ" oldStackTraceSignature="AssetsPath:GetTexturePath(String)" newStackTraceSignature="$vA:$eJ(String)" />
-      <method signature="string UtilityBuiltin/AssetsPath::@GetSpritesPath(string)" newName="$EJ" oldStackTraceSignature="AssetsPath:GetSpritesPath(String)" newStackTraceSignature="$vA:$EJ(String)" />
-      <method signature="string UtilityBuiltin/AssetsPath::@GetConfigPath(string, bool)" newName="$fJ" oldStackTraceSignature="AssetsPath:GetConfigPath(String, Boolean)" newStackTraceSignature="$vA:$fJ(String, Boolean)" />
-      <method signature="string UtilityBuiltin/AssetsPath::@GetScriptableConfigPath(string)" newName="$FJ" oldStackTraceSignature="AssetsPath:GetScriptableConfigPath(String)" newStackTraceSignature="$vA:$FJ(String)" />
-      <method signature="string UtilityBuiltin/AssetsPath::@GetPrefab(string)" newName="$gJ" oldStackTraceSignature="AssetsPath:GetPrefab(String)" newStackTraceSignature="$vA:$gJ(String)" />
-      <method signature="string UtilityBuiltin/AssetsPath::@GetLanguagePath(string, bool)" newName="$GJ" oldStackTraceSignature="AssetsPath:GetLanguagePath(String, Boolean)" newStackTraceSignature="$vA:$GJ(String, Boolean)" />
-      <method signature="string UtilityBuiltin/AssetsPath::@GetMaterialPath(string)" newName="$hJ" oldStackTraceSignature="AssetsPath:GetMaterialPath(String)" newStackTraceSignature="$vA:$hJ(String)" />
-      <method signature="string UtilityBuiltin/AssetsPath::@GetHotfixDll(string)" newName="$HJ" oldStackTraceSignature="AssetsPath:GetHotfixDll(String)" newStackTraceSignature="$vA:$HJ(String)" />
-      <method signature="string UtilityBuiltin/AssetsPath::@GetScriptableAsset(string)" newName="$iJ" oldStackTraceSignature="AssetsPath:GetScriptableAsset(String)" newStackTraceSignature="$vA:$iJ(String)" />
-    </type>
-    <type fullName="UtilityBuiltin/ColorExt" newFullName="$uA/$WA" status="Renamed">
-      <method signature="float UtilityBuiltin/ColorExt::@Difference([UnityEngine.CoreModule]UnityEngine.Color, [UnityEngine.CoreModule]UnityEngine.Color)" newName="$KJ" oldStackTraceSignature="ColorExt:Difference(Color, Color)" newStackTraceSignature="$WA:$KJ(Color, Color)" />
-    </type>
-    <type fullName="UtilityBuiltin/CurvePath" newFullName="$uA/$wA" status="Renamed">
-      <method signature="float UtilityBuiltin/CurvePath::@GetPathLength([UnityEngine.CoreModule]UnityEngine.Vector3[], bool)" newName="$kJ" oldStackTraceSignature="CurvePath:GetPathLength(Vector3[], Boolean)" newStackTraceSignature="$wA:$kJ(Vector3[], Boolean)" />
-    </type>
-    <type fullName="UtilityBuiltin/DES" newFullName="$uA/$zA" status="Renamed">
-      <method signature="string UtilityBuiltin/DES::@Encrypt(string, string)" newName="$rJ" oldStackTraceSignature="DES:Encrypt(String, String)" newStackTraceSignature="$zA:$rJ(String, String)" />
-      <method signature="string UtilityBuiltin/DES::@Decrypt(string, string)" newName="$RJ" oldStackTraceSignature="DES:Decrypt(String, String)" newStackTraceSignature="$zA:$RJ(String, String)" />
-    </type>
-    <type fullName="UtilityBuiltin/Json" newFullName="$uA/$VA" status="Renamed">
-      <method signature="string UtilityBuiltin/Json::@ToJson(object)" newName="$IJ" oldStackTraceSignature="Json:ToJson(Object)" newStackTraceSignature="$VA:$IJ(Object)" />
-      <method signature="!!0 UtilityBuiltin/Json::@ToObject`1(string)" newName="$jJ" oldStackTraceSignature="Json:ToObject(String)" newStackTraceSignature="$VA:$jJ(String)" />
-      <method signature="object UtilityBuiltin/Json::@ToObject(string)" newName="$JJ" oldStackTraceSignature="Json:ToObject(String)" newStackTraceSignature="$VA:$JJ(String)" />
-    </type>
-    <type fullName="UtilityBuiltin/MD5_32" newFullName="$uA/$yA" status="Renamed">
-      <method signature="string UtilityBuiltin/MD5_32::@Encrypt(string)" newName="$qJ" oldStackTraceSignature="MD5_32:Encrypt(String)" newStackTraceSignature="$yA:$qJ(String)" />
-    </type>
-    <type fullName="UtilityBuiltin/Valuer" newFullName="$uA/$XA" status="Renamed">
-      <method signature="string UtilityBuiltin/Valuer::@GetByteLengthString(long)" newName="$LJ" oldStackTraceSignature="Valuer:GetByteLengthString(Int64)" newStackTraceSignature="$XA:$LJ(Int64)" />
-      <method signature="string UtilityBuiltin/Valuer::@HideChars(string)" newName="$mJ" oldStackTraceSignature="Valuer:HideChars(String)" newStackTraceSignature="$XA:$mJ(String)" />
-      <method signature="string UtilityBuiltin/Valuer::@ToCoins(int)" newName="$MJ" oldStackTraceSignature="Valuer:ToCoins(Int32)" newStackTraceSignature="$XA:$MJ(Int32)" />
-      <method signature="string UtilityBuiltin/Valuer::@ToCoins(float)" newName="$nJ" oldStackTraceSignature="Valuer:ToCoins(Single)" newStackTraceSignature="$XA:$nJ(Single)" />
-      <method signature="string UtilityBuiltin/Valuer::@ToUsd(float)" newName="$NJ" oldStackTraceSignature="Valuer:ToUsd(Single)" newStackTraceSignature="$XA:$NJ(Single)" />
-      <method signature="string UtilityBuiltin/Valuer::@ToUsd(long)" newName="$oJ" oldStackTraceSignature="Valuer:ToUsd(Int64)" newStackTraceSignature="$XA:$oJ(Int64)" />
-      <method signature="string UtilityBuiltin/Valuer::@Float2String(float, int)" newName="$OJ" oldStackTraceSignature="Valuer:Float2String(Single, Int32)" newStackTraceSignature="$XA:$OJ(Single, Int32)" />
-      <method signature="string UtilityBuiltin/Valuer::@ToTime(float)" newName="$pJ" oldStackTraceSignature="Valuer:ToTime(Single)" newStackTraceSignature="$XA:$pJ(Single)" />
-      <method signature="int UtilityBuiltin/Valuer::@RoundToInt(float)" newName="$PJ" oldStackTraceSignature="Valuer:RoundToInt(Single)" newStackTraceSignature="$XA:$PJ(Single)" />
-    </type>
-    <type fullName="UtilityBuiltin/XOR" newFullName="$uA/$YA" status="Renamed">
-      <method signature="byte[] UtilityBuiltin/XOR::@QuickXor(byte[], string)" newName="$QJ" oldStackTraceSignature="XOR:QuickXor(Byte[], String)" newStackTraceSignature="$YA:$QJ(Byte[], String)" />
-    </type>
-    <type fullName="UtilityBuiltin/Zip" newFullName="$uA/$UA" status="Renamed">
-      <method signature="bool UtilityBuiltin/Zip::@Compress(string, string)" newName="$aJ" oldStackTraceSignature="Zip:Compress(String, String)" newStackTraceSignature="$UA:$aJ(String, String)" />
-      <method signature="bool UtilityBuiltin/Zip::@Decompress(string, string)" newName="$AJ" oldStackTraceSignature="Zip:Decompress(String, String)" newStackTraceSignature="$UA:$AJ(String, String)" />
     </type>
     <type fullName="WebRequestCertNoValidate" newFullName="$rA" status="Renamed" />
   </assembly>

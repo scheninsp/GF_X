@@ -1,8 +1,19 @@
->	Void UnityGameFramework.Editor.ResourceTools.ResourceAnalyzerController:AnalyzeAsset (String, Asset, DependencyData, HashSet`1)+0x2a at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\Scripts\Editor\ResourceAnalyzer\ResourceAnalyzerController.cs:[141:21-141:153]	C#
- 	Void UnityGameFramework.Editor.ResourceTools.ResourceAnalyzerController:AnalyzeAsset (String, Asset, DependencyData, HashSet`1)+0x14b at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\Scripts\Editor\ResourceAnalyzer\ResourceAnalyzerController.cs:[194:21-194:100]	C#
- 	Void UnityGameFramework.Editor.ResourceTools.ResourceAnalyzerController:Analyze ()+0xb6 at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\Scripts\Editor\ResourceAnalyzer\ResourceAnalyzerController.cs:[115:17-115:86]	C#
- 	Boolean UnityGameFramework.Editor.ResourceTools.ResourceBuilderController:BuildResources ()+0x45c at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\Scripts\Editor\ResourceBuilder\ResourceBuilderController.cs:[656:17-656:56]	C#
- 	Void UGF.EditorTools.AppBuildEidtor:BuildResources ()+0x7 at D:\UnityProjects\GF_X\GF_X\Assets\AAAGame\ScriptsBuiltin\Editor\EditorTools\AppBuildEidtor.cs:[1049:13-1049:47]	C#
- 	Void UGF.EditorTools.AppBuildEidtor:Update ()+0x14 at D:\UnityProjects\GF_X\GF_X\Assets\AAAGame\ScriptsBuiltin\Editor\EditorTools\AppBuildEidtor.cs:[154:17-154:34]	C#
- 	Void UnityEditor.HostView:SendUpdate ()+0xd at :-1	C#
- 	Void UnityEditor.EditorApplication:Internal_CallUpdateFunctions ()+0x33 at :-1	C#
+ 	LoadAssetTask LoadAssetTask:Create (String, Type, Int32, ResourceInfo, String[], LoadAssetCallbacks, Object)+0x1 at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\GameFramework\Resource\ResourceManager.ResourceLoader.LoadAssetTask.cs:[35:21-35:90]	C#
+ 	Void ResourceLoader:LoadAsset (String, Type, Int32, LoadAssetCallbacks, Object)+0xb8 at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\GameFramework\Resource\ResourceManager.ResourceLoader.cs:[334:17-334:161]	C#
+ 	Void GameFramework.Resource.ResourceManager:LoadAsset (String, Int32, LoadAssetCallbacks, Object)+0x37 at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\GameFramework\Resource\ResourceManager.cs:[1604:13-1604:97]	C#
+>	Void GameFramework.Entity.EntityManager:ShowEntity (Int32, String, String, Int32, Object)+0x11c at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\GameFramework\Entity\EntityManager.cs:[651:17-651:160]	C#
+ 	Void UnityGameFramework.Runtime.EntityComponent:ShowEntity (Int32, Type, String, String, Int32, Object)+0x2e at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\Scripts\Runtime\Entity\EntityComponent.cs:[494:13-494:144]	C#
+ 	Void UnityGameFramework.Runtime.EntityComponent:ShowEntity (Int32, String, String, Int32, Object)+0x13 at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\Scripts\Runtime\Entity\EntityComponent.cs:[474:13-474:99]	C#
+ 	Int32 EntityExtension:ShowEntity (EntityComponent, String, EntityGroup, Int32, EntityParams)+0x23 at D:\UnityProjects\GF_X\GF_X\Assets\AAAGame\Scripts\Extension\EntityExtension.cs:[178:9-178:84]	C#
+ 	Int32 EntityExtension:ShowEntity (EntityComponent, String, EntityGroup, EntityParams)+0x6 at D:\UnityProjects\GF_X\GF_X\Assets\AAAGame\Scripts\Extension\EntityExtension.cs:[193:9-193:62]	C#
+ 	UniTask`1 AwaitExtension:ShowEntityAwait (EntityComponent, String, EntityGroup, EntityParams)+0xb at D:\UnityProjects\GF_X\GF_X\Assets\AAAGame\Scripts\Extension\AwaitExtension\AwaitExtension.cs:[90:9-90:62]	C#
+ 	Void <ShowLevel>d__10:MoveNext ()+0x10f at D:\UnityProjects\GF_X\GF_X\Assets\AAAGame\Scripts\Procedures\MenuProcedure.cs:[87:9-87:132]	C#
+ 	Void MenuProcedure:OnEnter (IFsm`1)+0x11 at D:\UnityProjects\GF_X\GF_X\Assets\AAAGame\Scripts\Procedures\MenuProcedure.cs:[24:9-24:21]	C#
+ 	Void GameFramework.Fsm.Fsm`1:ChangeState (Type)+0x7d at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\GameFramework\Fsm\Fsm.cs:[585:13-585:42]	C#
+ 	Void GameFramework.Fsm.Fsm`1:ChangeState ()+0xc at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\GameFramework\Fsm\Fsm.cs:[562:13-562:41]	C#
+ 	Void GameFramework.Fsm.FsmState`1:ChangeState (IFsm`1)+0x1d at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\GameFramework\Fsm\FsmState.cs:[81:13-81:48]	C#
+ 	Void ChangeSceneProcedure:OnUpdate (IFsm`1, Single, Single)+0x35 at D:\UnityProjects\GF_X\GF_X\Assets\AAAGame\Scripts\Procedures\ChangeSceneProcedure.cs:[62:17-62:60]	C#
+ 	Void GameFramework.Fsm.Fsm`1:Update (Single, Single)+0x28 at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\GameFramework\Fsm\Fsm.cs:[545:13-545:77]	C#
+ 	Void GameFramework.Fsm.FsmManager:Update (Single, Single)+0x9b at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\GameFramework\Fsm\FsmManager.cs:[78:17-78:62]	C#
+ 	Void GameFramework.GameFrameworkEntry:Update (Single, Single)+0x1b at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\GameFramework\Base\GameFrameworkEntry.cs:[29:17-29:65]	C#
+ 	Void UnityGameFramework.Runtime.BaseComponent:Update ()+0xb at D:\UnityProjects\GF_X\GF_X\Assets\Plugins\UnityGameFramework\Scripts\Runtime\Base\BaseComponent.cs:[231:13-231:79]	C#

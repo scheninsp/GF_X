@@ -8,3 +8,12 @@ MyPlayer 这个名字出现在了数据表 AAAGame\DataTable\CombatUnitTable.txt
   的那一行数据。根据我们之前的发现，这一行就是代表玩家（"MyPlayer"）的数据。
 4. 最后，它调用 GF.Entity.ShowEntityAwait 方法，使用从数据表中读取到的预制体名称
   (playerRow.PrefabName，也就是 "MyPlayer") 来异步加载并创建玩家实体。
+
+  
+  
+热更新代码 (Scripts) 可以引用 AOT 代码 (ScriptsBuiltin)。
+AOT 代码 (ScriptsBuiltin) 不能直接引用或依赖热更新代码 (Scripts)。因为在编译主包时，热更新的 DLL 根本还不存在。
+
+只要加了 AllowDebugging 就能断到，不管是在 Scripts 还是 ScriptsBuiltin。
+HybridCLR 应当做了处理？
+

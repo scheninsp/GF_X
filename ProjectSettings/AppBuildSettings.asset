@@ -28,4 +28,4 @@ MonoBehaviour:
   KeyAliasPass: topgames
   ResourceBuildDir: AB
   AppBuildDir: BuildApp
-  EnableObfuz: 1
+  EnableObfuz: 0

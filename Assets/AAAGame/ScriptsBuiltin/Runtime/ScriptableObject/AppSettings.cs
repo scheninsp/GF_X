@@ -9,6 +9,30 @@ using UnityEditor;
 
 namespace UGF.EditorTools
 {
+    [InitializeOnLoad]
+    public static class AppSettingsPlayModeSetup
+    {
+        static AppSettingsPlayModeSetup()
+        {
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+        }
+
+        private static void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            if (state == PlayModeStateChange.ExitingEditMode)
+            {
+                if (AppSettings.Instance.DebugMode)
+                {
+                    EditorUserBuildSettings.waitForManagedDebugger = AppSettings.Instance.WaitForManagedDebugger;
+                }
+                else
+                {
+                    EditorUserBuildSettings.waitForManagedDebugger = false;
+                }
+            }
+        }
+    }
+    
     [CustomEditor(typeof(AppSettings))]
     public class AppSettinsInspector : Editor
     {
@@ -21,8 +45,36 @@ namespace UGF.EditorTools
         }
         public override void OnInspectorGUI()
         {
-            base.OnInspectorGUI();
             serializedObject.Update();
+
+            var debugModeProp = serializedObject.FindProperty("DebugMode");
+            var waitForManagedDebuggerProp = serializedObject.FindProperty("WaitForManagedDebugger");
+
+            EditorGUILayout.PropertyField(debugModeProp);
+
+            if (debugModeProp.boolValue)
+            {
+                EditorGUI.indentLevel++;
+                EditorGUILayout.PropertyField(waitForManagedDebuggerProp);
+                EditorGUI.indentLevel--;
+            }
+
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("ResourceMode"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("CheckVersionUrl"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("EncryptAOTDlls"));
+
+            if (serializedObject.ApplyModifiedProperties())
+            {
+                if (debugModeProp.boolValue)
+                {
+                    EditorUserBuildSettings.waitForManagedDebugger = waitForManagedDebuggerProp.boolValue;
+                }
+                else
+                {
+                    EditorUserBuildSettings.waitForManagedDebugger = false;
+                }
+            }
+            
             EditorGUI.BeginDisabledGroup(EditorApplication.isPlaying);
             EditorGUILayout.BeginHorizontal();
             {
@@ -34,7 +86,6 @@ namespace UGF.EditorTools
                 EditorGUILayout.EndHorizontal();
             }
             EditorGUI.EndDisabledGroup();
-            serializedObject.ApplyModifiedProperties();
         }
         private static void SetDesignResolution(Vector2Int designResolution)
         {
@@ -110,6 +161,8 @@ public class AppSettings : ScriptableObject
     }
     [Tooltip("debug模式,默认显示debug窗口")]
     public bool DebugMode = false;
+    [Tooltip("等待C#调试器连接")]
+    public bool WaitForManagedDebugger = false;
     [Tooltip("资源模式: 单机/全热更/需要时热更")]
     public ResourceMode ResourceMode = ResourceMode.Package;
     [Tooltip("热更版本检测URL:")]
